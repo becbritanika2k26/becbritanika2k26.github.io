@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "title": "Registration Started!",
+        "content": "Official registrations for Britanika 2K26 are now open.",
+        "time": "2026-02-07 10:00 AM",
+        "type": "announcement"
+    },
+    {
+        "id": 2,
+        "title": "Rulebook Released",
+        "content": "Check the events page for updated rules and regulations.",
+        "time": "2026-02-07 12:00 PM",
+        "type": "update"
+    }
+]

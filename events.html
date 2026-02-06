@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Other Events | BEC Britanika 2K26</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <img src="assets/logo.png" alt="BEC Logo" class="nav-logo-img">
+            <div class="logo-text">
+                BRITANIKA 2K26
+                <span>BHUBANESWAR ENGINEERING COLLEGE</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="sports.html">Sports</a></li>
+            <li><a href="cultural.html">Cultural</a></li>
+            <li><a href="events.html">Other Events</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="updates.html">Live Updates</a></li>
+        </ul>
+        <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+    </nav>
+
+    <div class="container" style="margin-top: 80px;">
+        <div class="section-title">Other Events</div>
+        <div class="card-grid" id="other-events-container">
+            <!-- Dynamic Content -->
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal-content">
+            <!-- Modal Body -->
+        </div>
+    </div>
+
+    <script src="js/fetchData.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCards('other-events-container', DataManager.getOtherEvents.bind(DataManager));
+        });
+    </script>
+</body>
+</html>

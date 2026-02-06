@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEC Britanika 2K26 | Bhubaneswar Engineering College</title>
+    <meta name="description" content="Annual Sports, Cultural & Technical Fest of Bhubaneswar Engineering College. Join us for BEC Britanika 2K26.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <img src="assets/logo.png" alt="BEC Logo" class="nav-logo-img">
+            <div class="logo-text">
+                BRITANIKA 2K26
+                <span>BHUBANESWAR ENGINEERING COLLEGE</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="sports.html">Sports</a></li>
+            <li><a href="cultural.html">Cultural</a></li>
+            <li><a href="events.html">Other Events</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="updates.html">Live Updates</a></li>
+        </ul>
+        <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+    </nav>
+
+    <header class="hero">
+
+        <p class="hero-subtitle">Bhubaneswar Engineering College Presents</p>
+        <h1>BEC Britanika 2K26</h1>
+        <p class="hero-desc">A Symphony of Sports, Culture, and Innovation. Unleash your potential in the heart of Odisha.</p>
+        
+        <div class="countdown">
+            <div class="countdown-item">
+                <span id="days">00</span>
+                <label>Days</label>
+            </div>
+            <div class="countdown-item">
+                <span id="hours">00</span>
+                <label>Hours</label>
+            </div>
+            <div class="countdown-item">
+                <span id="minutes">00</span>
+                <label>Minutes</label>
+            </div>
+            <div class="countdown-item">
+                <span id="seconds">00</span>
+                <label>Seconds</label>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem;">
+            <a href="sports.html" class="btn btn-primary">Sports</a>
+            <a href="cultural.html" class="btn btn-glass">Cultural</a>
+            <a href="events.html" class="btn btn-glass">Other Events</a>
+            <a href="schedule.html" class="btn btn-glass">Schedule</a>
+        </div>
+    </header>
+
+    <div class="updates-ticker">
+        <div class="ticker-content" id="live-ticker">
+            Loading live updates...
+        </div>
+    </div>
+
+    <section class="container" style="display: grid; grid-template-columns: 1fr 350px; gap: 3rem; align-items: start;">
+        <div class="home-main">
+            <div class="section-title" style="text-align: left; margin-left: 0;">Why Britanika?</div>
+            <div class="card-grid" style="grid-template-columns: 1fr;">
+                <div class="card" style="display: flex; gap: 1.5rem; align-items: center;">
+                    <i class="fas fa-trophy" style="font-size: 2.5rem; color: var(--primary);"></i>
+                    <div>
+                        <h3>Excellence</h3>
+                        <p>Compete with the best talents from across the region in 30+ diverse events.</p>
+                    </div>
+                </div>
+                <div class="card" style="display: flex; gap: 1.5rem; align-items: center;">
+                    <i class="fas fa-music" style="font-size: 2.5rem; color: var(--accent);"></i>
+                    <div>
+                        <h3>Culture</h3>
+                        <p>Celebrate the rich heritage of Odisha through song, dance, and art.</p>
+                    </div>
+                </div>
+                <div class="card" style="display: flex; gap: 1.5rem; align-items: center;">
+                    <i class="fas fa-microchip" style="font-size: 2.5rem; color: var(--secondary);"></i>
+                    <div>
+                        <h3>Innovation</h3>
+                        <p>Showcase your technical prowess in coding and project exhibitions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="live-sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-broadcast-tower"></i> Live Campus Buzz</h3>
+                    <span class="live-dot"></span>
+                </div>
+                <div id="homepage-live-updates" class="sidebar-content">
+                    <!-- Dynamic Updates -->
+                    <div class="loading-shimmer"></div>
+                </div>
+                <button class="btn btn-glass" onclick="reopenSpotlight()" style="width: 100%; margin-top: 1rem; font-size: 0.8rem;">
+                    <i class="fas fa-calendar-alt"></i> View Tomorrow's Schedule
+                </button>
+            </div>
+        </aside>
+    </section>
+
+    <!-- Tomorrow's Spotlight Popup -->
+    <div id="spotlight-overlay" class="modal-overlay" style="display: none;">
+        <div class="modal spotlight-modal">
+            <span class="modal-close" onclick="closeSpotlight()">&times;</span>
+            <div class="spotlight-header">
+                <i class="fas fa-star-of-life fa-spin" style="color: var(--accent);"></i>
+                <h2>TODAY'S SPOTLIGHT</h2>
+                <p id="spotlight-date">Feb 07, 2026</p>
+            </div>
+            <div id="spotlight-content">
+                <!-- Dynamic Content -->
+            </div>
+            <button class="btn btn-primary" onclick="closeSpotlight()" style="margin-top: 2rem; width: 100%;">Got it!</button>
+        </div>
+    </div>
+
+    <footer style="padding: 3rem; text-align: center; border-top: 1px solid var(--glass-border);">
+        <p>&copy; 2026 Bhubaneswar Engineering College. All Rights Reserved.</p>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 10px;">Designed for Britanika 2K26</p>
+    </footer>
+
+    <script src="js/fetchData.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/spotlight.js"></script>
+</body>
+</html>

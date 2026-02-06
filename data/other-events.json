@@ -1,0 +1,122 @@
+[
+    {
+        "id": "debate",
+        "name": "Debate",
+        "date": "2026-03-15",
+        "time": "10:00 AM",
+        "venue": "Seminar Hall",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "essay",
+        "name": "Essay Writing",
+        "date": "2026-03-15",
+        "time": "02:00 PM",
+        "venue": "Room 101",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "quiz",
+        "name": "Grand Quiz",
+        "date": "2026-03-16",
+        "time": "11:00 AM",
+        "venue": "Seminar Hall",
+        "category": "General",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "rangoli",
+        "name": "Rangoli",
+        "date": "2026-03-16",
+        "time": "03:00 PM",
+        "venue": "Corridor A",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "mehndi",
+        "name": "Mehndi",
+        "date": "2026-03-16",
+        "time": "03:00 PM",
+        "venue": "Corridor B",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "chess",
+        "name": "Chess",
+        "date": "2026-03-17",
+        "time": "09:00 AM",
+        "venue": "Library",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "carrom",
+        "name": "Carrom",
+        "date": "2026-03-17",
+        "time": "10:00 AM",
+        "venue": "Common Room",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "no-gas-cooking",
+        "name": "No Gas Cooking",
+        "date": "2026-03-18",
+        "time": "11:00 AM",
+        "venue": "Food Plaza",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "coding",
+        "name": "Coding Contest",
+        "date": "2026-03-15",
+        "time": "02:00 PM",
+        "venue": "Lab 1",
+        "category": "Technical",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "project-exhibition",
+        "name": "Project Exhibition",
+        "date": "2026-03-19",
+        "time": "10:00 AM",
+        "venue": "Tech Hall",
+        "category": "Technical",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "painting",
+        "name": "Painting",
+        "date": "2026-03-19",
+        "time": "11:00 AM",
+        "venue": "Art Room",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "rubiks-cube",
+        "name": "Rubik’s Cube",
+        "date": "2026-03-20",
+        "time": "10:00 AM",
+        "venue": "Activity Center",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    }
+]

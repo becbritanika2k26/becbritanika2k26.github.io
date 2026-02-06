@@ -1,0 +1,217 @@
+[
+    {
+        "id": "shot-put-girls",
+        "name": "SHOT PUT (Girls)",
+        "date": "07/02/2026",
+        "time": "09:30 AM – 10:00 AM",
+        "venue": "Throwing Area",
+        "category": "B.Tech",
+        "image": "shot_put_event_1770407701024.png",
+        "participants_pdf": "assets/pdf/shotput-girls.pdf",
+        "participants": [
+            "Lipi Mallick – 2nd Year",
+            "Lijarani Jena – 2nd Year",
+            "Karina Sethi – 3rd Year",
+            "Manisha Pradhan – 2nd Year",
+            "Barsha Rani Ganda – 2nd Year",
+            "K Smrutimayee Patra – 2nd Year",
+            "Vijayalaxmi Mondal – 2nd Year",
+            "Sujaya Mallick – 1st Year",
+            "Jyostnarani Ho – 2nd Year",
+            "Laxmi Priya Muduli – 3rd Year",
+            "Uma Samad – 2nd Year"
+        ],
+        "result": ""
+    },
+    {
+        "id": "shot-put-boys",
+        "name": "SHOT PUT (Boys)",
+        "date": "07/02/2026",
+        "time": "09:30 AM – 10:00 AM",
+        "venue": "Throwing Area",
+        "category": "B.Tech / Diploma",
+        "participants": {
+            "B.Tech": [
+                "Satyajit Mishra – 2nd Year",
+                "Placeholder – 1st Year"
+            ],
+            "Diploma": [
+                "Placeholder – 2nd Year"
+            ]
+        },
+        "result": ""
+    },
+    {
+        "id": "discus-throw-boys",
+        "name": "DISCUS THROW (Boys)",
+        "date": "07/02/2026",
+        "time": "11:00 AM – 12:00 PM",
+        "venue": "Throwing Area",
+        "category": "B.Tech / Diploma",
+        "participants": {
+            "B.Tech": [
+                "Satyajit Mishra – 2nd Year"
+            ],
+            "Diploma": []
+        },
+        "result": ""
+    },
+    {
+        "id": "long-jump-girls",
+        "name": "LONG JUMP (Girls)",
+        "date": "07/02/2026",
+        "time": "10:30 AM – 11:00 AM",
+        "venue": "Jump Pit",
+        "category": "B.Tech",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "long-jump-boys",
+        "name": "LONG JUMP (Boys)",
+        "date": "07/02/2026",
+        "time": "10:30 AM – 11:00 AM",
+        "venue": "Jump Pit",
+        "category": "B.Tech + Diploma",
+        "participants": {
+            "B.Tech": [],
+            "Diploma": []
+        },
+        "result": ""
+    },
+    {
+        "id": "race-200m-girls",
+        "name": "200M RUN (Girls)",
+        "date": "07/02/2026",
+        "time": "08:30 AM – 09:30 AM",
+        "venue": "Athletics Track",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "race-200m-boys",
+        "name": "200M RUN (Boys)",
+        "date": "07/02/2026",
+        "time": "08:30 AM – 09:30 AM",
+        "venue": "Athletics Track",
+        "category": "B.Tech + Diploma",
+        "participants": {
+            "B.Tech": [],
+            "Diploma": []
+        },
+        "result": ""
+    },
+    {
+        "id": "race-100m-girls",
+        "name": "100M RUN (Girls)",
+        "date": "07/02/2026",
+        "time": "08:30 AM – 09:30 AM",
+        "venue": "Athletics Track",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "cricket",
+        "name": "Cricket – BEC Premier League",
+        "date": "07/02/2026",
+        "time": "10:00 AM Onwards",
+        "venue": "Main Ground",
+        "category": "Inter-Dept",
+        "image": "cricket_match_action_1770407715723.png",
+        "participants_pdf": "assets/pdf/cricket-bpl.pdf",
+        "participants": [],
+        "brackets": [
+            {
+                "match": "Match 1",
+                "teams": "TBA vs TBA",
+                "time": "10:00 AM"
+            },
+            {
+                "match": "Match 2",
+                "teams": "TBA vs TBA",
+                "time": "11:30 AM"
+            },
+            {
+                "match": "Match 3",
+                "teams": "TBA vs TBA",
+                "time": "01:00 PM"
+            },
+            {
+                "match": "Match 4",
+                "teams": "TBA vs TBA",
+                "time": "02:30 PM"
+            },
+            {
+                "match": "Semi Final 1",
+                "teams": "Winner M1 vs Winner M2",
+                "time": "04:00 PM"
+            },
+            {
+                "match": "Semi Final 2",
+                "teams": "Winner M3 vs Winner M4",
+                "time": "05:30 PM"
+            },
+            {
+                "match": "Grand Final",
+                "teams": "Winner SF1 vs Winner SF2",
+                "time": "07:30 PM"
+            }
+        ],
+        "result": ""
+    },
+    {
+        "id": "volleyball",
+        "name": "Volleyball – Inter Department",
+        "date": "07/02/2026 - 12/02/2026",
+        "time": "01:00 PM – 03:45 PM",
+        "venue": "Sports Arena",
+        "category": "Inter-Dept",
+        "image": "volleyball_tournament_1770407731018.png",
+        "participants": [],
+        "schedule": [
+            {
+                "match": "Match 1",
+                "date": "07/02/2026",
+                "time": "01:00 PM"
+            },
+            {
+                "match": "Semi Finals",
+                "date": "11/02/2026",
+                "time": "01:00 PM"
+            },
+            {
+                "match": "Final",
+                "date": "12/02/2026",
+                "time": "02:00 PM"
+            }
+        ],
+        "result": ""
+    },
+    {
+        "id": "kabaddi",
+        "name": "Kabaddi – Inter Department",
+        "date": "07/02/2026",
+        "time": "04:00 PM Onwards",
+        "venue": "Ground B",
+        "category": "Inter-Dept",
+        "image": "kabaddi_match_1770407747555.png",
+        "participants": [],
+        "schedule": [
+            {
+                "match": "Match 1",
+                "time": "04:00 PM"
+            },
+            {
+                "match": "Match 2",
+                "time": "05:00 PM"
+            },
+            {
+                "match": "Final",
+                "time": "06:30 PM"
+            }
+        ],
+        "result": ""
+    }
+]

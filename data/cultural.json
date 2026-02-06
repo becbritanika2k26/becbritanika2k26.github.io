@@ -1,0 +1,62 @@
+[
+    {
+        "id": "solo-song",
+        "name": "Solo Song",
+        "date": "2026-03-17",
+        "time": "11:00 AM",
+        "venue": "Auditorium",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "group-song",
+        "name": "Group Song",
+        "date": "2026-03-17",
+        "time": "02:00 PM",
+        "venue": "Auditorium",
+        "category": "Group",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "solo-dance",
+        "name": "Solo Dance",
+        "date": "2026-03-18",
+        "time": "10:00 AM",
+        "venue": "Cultural Stage",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "group-dance",
+        "name": "Group Dance",
+        "date": "2026-03-18",
+        "time": "06:00 PM",
+        "venue": "Cultural Stage",
+        "category": "Group",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "drama",
+        "name": "Drama",
+        "date": "2026-03-19",
+        "time": "04:00 PM",
+        "venue": "Auditorium",
+        "category": "Group",
+        "participants": [],
+        "result": ""
+    },
+    {
+        "id": "ramp-show",
+        "name": "Ramp Show",
+        "date": "2026-03-20",
+        "time": "07:00 PM",
+        "venue": "Main Stage",
+        "category": "Open",
+        "participants": [],
+        "result": ""
+    }
+]

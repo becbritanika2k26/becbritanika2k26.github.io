@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Schedule | BEC Britanika 2K26</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .filter-bar {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border: 1px solid var(--glass-border);
+        }
+        .filter-bar input, .filter-bar select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            outline: none;
+            flex: 1;
+            min-width: 200px;
+        }
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: var(--glass-border);
+            transform: translateX(-50%);
+        }
+        .timeline-item {
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: 20px;
+            width: 45%;
+            margin-bottom: 2rem;
+            position: relative;
+            border: 1px solid var(--glass-border);
+        }
+        .timeline-item:nth-child(odd) { float: left; clear: right; }
+        .timeline-item:nth-child(even) { float: right; clear: left; margin-top: 3rem; }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+        .timeline-item:nth-child(odd)::after { right: -60px; transform: translateY(-50%); }
+        .timeline-item:nth-child(even)::after { left: -60px; transform: translateY(-50%); }
+        
+        @media (max-width: 768px) {
+            .timeline::before { left: 0; }
+            .timeline-item { width: 100%; float: none !important; margin-left: 20px; }
+            .timeline-item::after { left: -30px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <img src="assets/logo.png" alt="BEC Logo" class="nav-logo-img">
+            <div class="logo-text">
+                BRITANIKA 2K26
+                <span>BHUBANESWAR ENGINEERING COLLEGE</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="sports.html">Sports</a></li>
+            <li><a href="cultural.html">Cultural</a></li>
+            <li><a href="events.html">Other Events</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="updates.html">Live Updates</a></li>
+        </ul>
+        <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+    </nav>
+
+    <div class="container" style="margin-top: 80px;">
+        <div class="section-title">Timeline & Schedule</div>
+        
+        <div class="filter-bar">
+            <input type="text" id="search-input" placeholder="Search events...">
+            <select id="type-filter">
+                <option value="all">All Event Types</option>
+                <option value="sports">Sports</option>
+                <option value="cultural">Cultural</option>
+                <option value="other">Other Events</option>
+            </select>
+        </div>
+
+        <div class="timeline" id="timeline-container">
+            <!-- Dynamic Content -->
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+
+    <script src="js/fetchData.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        let allEvents = [];
+
+        async function initSchedule() {
+            const sports = await DataManager.getSports();
+            const cultural = await DataManager.getCultural();
+            const other = await DataManager.getOtherEvents();
+
+            allEvents = [
+                ...sports.map(e => ({ ...e, type: 'sports' })),
+                ...cultural.map(e => ({ ...e, type: 'cultural' })),
+                ...other.map(e => ({ ...e, type: 'other' }))
+            ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            renderTimeline(allEvents);
+        }
+
+        function renderTimeline(events) {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = events.map(event => `
+                <div class="timeline-item">
+                    <div style="color: var(--primary); font-weight: 600;">${event.date} | ${event.time}</div>
+                    <h3 style="margin: 0.5rem 0;">${event.name}</h3>
+                    <div style="color: var(--text-dim); font-size: 0.9rem;">
+                        <i class="fas fa-map-marker-alt"></i> ${event.venue}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('search-input').addEventListener('input', filterEvents);
+        document.getElementById('type-filter').addEventListener('change', filterEvents);
+
+        function filterEvents() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const typeFilter = document.getElementById('type-filter').value;
+
+            const filtered = allEvents.filter(e => {
+                const matchesSearch = e.name.toLowerCase().includes(searchTerm);
+                const matchesType = typeFilter === 'all' || e.type === typeFilter;
+                return matchesSearch && matchesType;
+            });
+
+            renderTimeline(filtered);
+        }
+
+        document.addEventListener('DOMContentLoaded', initSchedule);
+    </script>
+</body>
+</html>
