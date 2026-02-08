@@ -64,6 +64,7 @@ window.adminEventsController = {
             venue: document.getElementById('edit-venue').value,
             date: document.getElementById('edit-date').value,
             time: document.getElementById('edit-time').value,
+            status: document.getElementById('edit-status').value || 'UPCOMING',
             participants: document.getElementById('edit-participants').value.split('\n').filter(p => p.trim())
         };
 
@@ -138,6 +139,7 @@ window.adminEventsController = {
         document.getElementById('edit-venue').value = event.venue || '';
         document.getElementById('edit-date').value = event.date || '';
         document.getElementById('edit-time').value = event.time || '';
+        document.getElementById('edit-status').value = event.status || 'UPCOMING';
         document.getElementById('edit-participants').value = (event.participants || []).join('\n');
         document.getElementById('event-modal').style.display = 'flex';
     },

@@ -20,6 +20,7 @@
         </div>
         <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
+            <li><a href="fest-at-a-glance.html">At a Glance</a></li>
             <li><a href="sports.html">Sports</a></li>
             <li><a href="cultural.html">Cultural</a></li>
             <li><a href="events.html">Other Events</a></li>
@@ -74,27 +75,39 @@
             <div id="hub-live-status"></div>
         </div>
         <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-            <a href="live-score.html" class="card broadcast-card" style="text-decoration: none; position: relative; overflow: hidden; border-color: var(--accent);">
-                <div class="live-tag">LIVE NOW</div>
-                <i class="fas fa-satellite-dish" style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
-                <h3>View Live Scoreboard</h3>
-                <p>Experience the match with TV-style graphics, player stats, and real-time animations.</p>
-                <div class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Open Scoreboard</div>
+            <!-- Cricket -->
+            <a href="live-score.html" class="card broadcast-card" style="text-decoration: none; border-color: var(--accent-red);">
+                <div class="live-tag">LIVE CRICKET</div>
+                <i class="fas fa-cricket-bat-ball" style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                <h3>Cricket Scoreboard</h3>
+                <p>TV-style graphics, player stats, and real-time animations.</p>
+                <div id="cricket-mini-score" style="font-size: 0.8rem; margin-top: 10px; color: #94a3b8;">Loading match...</div>
             </a>
 
+            <!-- Volleyball -->
+            <a href="live-volleyball.html" class="card broadcast-card" style="text-decoration: none; border-color: var(--accent);">
+                <div class="live-tag">LIVE VOLLEYBALL</div>
+                <i class="fas fa-volleyball-ball" style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                <h3>Volleyball Hub</h3>
+                <p>Live set tracking and point-by-point updates with serving status.</p>
+                <div id="volleyball-mini-score" style="font-size: 1rem; font-weight: 900; margin-top: 10px; color: #fff;">00 - 00</div>
+            </a>
+
+            <!-- Kabaddi -->
+            <a href="live-kabaddi.html" class="card broadcast-card" style="text-decoration: none; border-color: #22c55e;">
+                <div class="live-tag">LIVE KABADDI</div>
+                <i class="fas fa-walking" style="font-size: 3rem; color: #22c55e; margin-bottom: 1rem;"></i>
+                <h3>Kabaddi Hub</h3>
+                <p>Raid, Tackle, and Bonus points with real-time match timeline.</p>
+                <div id="kabaddi-mini-score" style="font-size: 1rem; font-weight: 900; margin-top: 10px; color: #fff;">00 - 00</div>
+            </a>
+
+            <!-- History -->
             <a href="history.html" class="card broadcast-card" style="text-decoration: none; border-color: var(--primary);">
                 <i class="fas fa-history" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
                 <h3>Match History</h3>
-                <p>Missed the action? Review all previous match scores, player performances, and results.</p>
-                <div class="btn btn-glass" style="margin-top: 1rem; width: 100%; border-color: var(--primary); color: var(--primary);">View Records</div>
+                <p>Review all previous match scores, player performances, and winners.</p>
             </a>
-            
-            <div class="card broadcast-card" onclick="toggleDemoMode()" style="border-color: var(--accent-gold);">
-                <i class="fas fa-play-circle" style="font-size: 3rem; color: var(--accent-gold); margin-bottom: 1rem;"></i>
-                <h3>Try Demo Mode</h3>
-                <p>Instant live simulation. See the scorecard update automatically with animations.</p>
-                <div id="demo-btn-text" class="btn btn-glass" style="margin-top: 1rem; width: 100%; border-color: var(--accent-gold); color: var(--accent-gold);">Start Simulation</div>
-            </div>
         </div>
     </section>
 

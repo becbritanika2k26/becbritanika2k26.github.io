@@ -42,9 +42,11 @@ window.Renderer = {
                 <td>${e.time}</td>
                 <td>${e.venue}</td>
                 <td>
-                    ${e.deleted ?
-                `<span class="badge badge-danger">Deleted</span>` :
-                `<span class="badge badge-success">Active</span>`
+                    ${e.status === 'ONGOING' ?
+                '<span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #22c55e;">LIVE NOW</span>' :
+                e.status === 'COMPLETED' ?
+                    '<span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8;">FINISHED</span>' :
+                    '<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">SCHEDULED</span>'
             }
                 </td>
                 <td class="table-actions">

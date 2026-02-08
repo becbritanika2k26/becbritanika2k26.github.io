@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLLEYBALL ADMIN | BRITANIKA 2K26</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <style>
+        .volleyball-scoring {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .team-control {
+            background: rgba(30, 41, 59, 0.4);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .point-btn {
+            font-size: 3rem;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent-blue);
+            color: #000;
+            font-weight: 900;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+        .point-btn:hover {
+            transform: scale(1.1);
+            background: #fff;
+        }
+        .set-score { font-size: 1.5rem; font-weight: 900; color: var(--accent-gold); }
+        .serving-indicator {
+            width: 15px;
+            height: 15px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            box-shadow: 0 0 10px var(--accent-gold);
+            opacity: 0;
+        }
+        .serving-indicator.active { opacity: 1; }
+    </style>
+</head>
+<body class="admin-theme">
+    <div id="auth-wall" style="position: fixed; top:0; left:0; width:100%; height:100%; background: #020617; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+        <h2 style="color: #38bdf8;">ADMIN ACCESS REQUIRED</h2>
+        <a href="admin.html" class="btn-main" style="text-decoration: none; background: #38bdf8; color: #000; padding: 12px 25px; border-radius: 8px;">GO TO LOGIN PAGE</a>
+    </div>
+
+    <header class="admin-header" style="height: auto; padding: 15px 40px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="assets/logo.png" alt="Logo" style="width: 40px;">
+            <h1 style="margin: 0; font-size: 1.2rem;">VOLLEYBALL <span style="color: var(--primary);">SCORING SYSTEM</span></h1>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="live-volleyball.html" target="_blank" class="btn-main" style="margin: 0; background: var(--accent-blue); color: #000; font-size: 0.7rem; padding: 8px 15px;">📺 TV VIEW</a>
+            <a href="admin.html" class="btn-main" style="margin: 0; background: rgba(255,255,255,0.1); color: #fff; font-size: 0.7rem; padding: 8px 15px;">BACK</a>
+        </div>
+    </header>
+
+    <div class="admin-layout" style="grid-template-columns: 300px 1fr;">
+        <aside class="card-panel">
+            <h2 style="color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 20px;">MATCH SETUP</h2>
+            <div class="input-group">
+                <label>TEAM A</label>
+                <input type="text" id="setup-team-a" placeholder="e.g. Mechanical">
+            </div>
+            <div class="input-group">
+                <label>TEAM B</label>
+                <input type="text" id="setup-team-b" placeholder="e.g. Civil">
+            </div>
+            <div class="input-group">
+                <label>TOTAL SETS (Best of)</label>
+                <select id="setup-sets">
+                    <option value="3">Best of 3</option>
+                    <option value="5">Best of 5</option>
+                </select>
+            </div>
+            <button onclick="initMatch()" class="btn-main btn-start">INITIALIZE MATCH</button>
+            <button onclick="hardReset()" class="btn-main btn-reset" style="margin-top: 20px;">RESET ALL</button>
+        </aside>
+
+        <main>
+            <div class="card-panel" style="text-align: center; margin-bottom: 20px;">
+                <h3 id="set-info" style="margin:0; letter-spacing: 2px; color: var(--accent-gold);">SET 1</h3>
+                <div id="match-title" style="font-size: 1.5rem; font-weight: 900; margin-top: 5px;">TEAM A VS TEAM B</div>
+            </div>
+
+            <div class="volleyball-scoring">
+                <div class="team-control">
+                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                        <span id="serve-a" class="serving-indicator"></span>
+                        <h2 id="team-a-disp" style="margin:0;">TEAM A</h2>
+                    </div>
+                    <div id="sets-a" class="set-score">SETS: 0</div>
+                    <button class="point-btn" onclick="addPoint('A')">0</button>
+                    <div style="font-size: 0.8rem; opacity: 0.6;">CLICK TO ADD POINT</div>
+                </div>
+
+                <div class="team-control">
+                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                        <span id="serve-b" class="serving-indicator"></span>
+                        <h2 id="team-b-disp" style="margin:0;">TEAM B</h2>
+                    </div>
+                    <div id="sets-b" class="set-score">SETS: 0</div>
+                    <button class="point-btn" onclick="addPoint('B')">0</button>
+                    <div style="font-size: 0.8rem; opacity: 0.6;">CLICK TO ADD POINT</div>
+                </div>
+            </div>
+
+            <div class="card-panel" style="margin-top: 20px;">
+                <h3>SET HISTORY</h3>
+                <div id="set-history" style="display: flex; gap: 10px;">
+                    <!-- Set history -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import './js/adminController.js';
+        import './js/volleyballEngine.js';
+
+        window.AdminController.initAuth((user) => {
+            if (user) {
+                document.getElementById('auth-wall').style.display = 'none';
+                window.VolleyballEngine.initSync((state) => refreshUI(state));
+            }
+        });
+
+        window.AdminController.initConnectionIndicator();
+
+        function refreshUI(state) {
+            if (!state) return;
+            const { matchInfo, currentSet, history } = state;
+
+            document.getElementById('team-a-disp').innerText = matchInfo.teamA.name;
+            document.getElementById('team-b-disp').innerText = matchInfo.teamB.name;
+            document.getElementById('match-title').innerText = `${matchInfo.teamA.name} VS ${matchInfo.teamB.name}`;
+            document.getElementById('set-info').innerText = `SET ${matchInfo.currentSetNumber} (${matchInfo.status})`;
+            
+            document.getElementById('sets-a').innerText = `SETS: ${matchInfo.teamA.setsWon}`;
+            document.getElementById('sets-b').innerText = `SETS: ${matchInfo.teamB.setsWon}`;
+
+            document.querySelectorAll('.point-btn')[0].innerText = currentSet.teamA;
+            document.querySelectorAll('.point-btn')[1].innerText = currentSet.teamB;
+
+            document.getElementById('serve-a').classList.toggle('active', matchInfo.servingTeam === 'A');
+            document.getElementById('serve-b').classList.toggle('active', matchInfo.servingTeam === 'B');
+
+            const histContainer = document.getElementById('set-history');
+            histContainer.innerHTML = history.map(h => `
+                <div style="background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 8px; text-align:center;">
+                    <div style="font-size: 0.7rem; opacity: 0.6;">SET ${h.set}</div>
+                    <div style="font-weight: 900;">${h.teamA} - ${h.teamB}</div>
+                </div>
+            `).join('');
+        }
+
+        window.initMatch = () => {
+            window.VolleyballEngine.initMatch({
+                teamA: document.getElementById('setup-team-a').value,
+                teamB: document.getElementById('setup-team-b').value,
+                totalSets: parseInt(document.getElementById('setup-sets').value)
+            });
+        };
+
+        window.addPoint = (team) => window.VolleyballEngine.addPoint(team);
+        window.hardReset = () => { if(confirm("Reset entire match?")) window.VolleyballEngine.initMatch({}); };
+    </script>
+</body>
+</html>

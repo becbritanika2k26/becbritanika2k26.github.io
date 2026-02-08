@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVE KABADDI | BRITANIKA 2K26</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <style>
+        .kb-live-container { max-width: 1200px; margin: 40px auto; padding: 20px; }
+        .score-panel-kb {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border-radius: 30px; padding: 50px; border: 1px solid rgba(255,255,255,0.1);
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6); position: relative; overflow: hidden;
+        }
+        .score-panel-kb::before {
+            content: 'KABADDI'; position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            font-size: 8rem; font-weight: 900; opacity: 0.03; letter-spacing: 20px;
+        }
+        .team-kb h2 { font-size: 3.5rem; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: -2px; }
+        .kb-points { font-size: 9rem; font-weight: 900; line-height: 1; color: var(--accent-blue); margin: 10px 0; text-shadow: 0 0 30px rgba(56, 189, 248, 0.3); }
+        .kb-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px; }
+        .kb-stat-item { background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; }
+        .vs-kb { font-size: 2.5rem; font-weight: 900; color: var(--accent-gold); background: rgba(245, 158, 11, 0.1); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
+        .timeline-tray { margin-top: 40px; background: rgba(30, 41, 59, 0.4); border-radius: 20px; padding: 20px; }
+        .timeline-title { font-size: 0.8rem; color: var(--accent-gold); font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .timeline-list { display: flex; flex-direction: column; gap: 10px; }
+        .tl-item { display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 8px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="kb-live-container">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <span class="status-badge status-live" id="kb-status">LIVE MATCH | 1ST HALF</span>
+        </div>
+
+        <div class="score-panel-kb">
+            <div class="team-kb">
+                <h2 id="name-a">TEAM A</h2>
+                <div class="kb-points" id="score-a">0</div>
+                <div class="kb-stats-grid">
+                    <div class="kb-stat-item">RAID: <span id="raid-a">0</span></div>
+                    <div class="kb-stat-item">TACKLE: <span id="tackle-a">0</span></div>
+                    <div class="kb-stat-item">BONUS: <span id="bonus-a">0</span></div>
+                    <div class="kb-stat-item">ALL-OUT: <span id="ao-a">0</span></div>
+                </div>
+            </div>
+
+            <div class="vs-kb">VS</div>
+
+            <div class="team-kb" style="text-align: right;">
+                <h2 id="name-b">TEAM B</h2>
+                <div class="kb-points" id="score-b">0</div>
+                <div class="kb-stats-grid">
+                    <div class="kb-stat-item">RAID: <span id="raid-b">0</span></div>
+                    <div class="kb-stat-item">TACKLE: <span id="tackle-b">0</span></div>
+                    <div class="kb-stat-item">BONUS: <span id="bonus-b">0</span></div>
+                    <div class="kb-stat-item">ALL-OUT: <span id="ao-b">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-tray">
+            <div class="timeline-title">Match Timeline</div>
+            <div class="timeline-list" id="kb-timeline">
+                <!-- Timeline items -->
+            </div>
+        </div>
+    </div>
+
+    <div id="event-animation-overlay" class="event-overlay theme-allout">
+        <div class="event-content">
+            <div class="event-text" id="event-main-text">ALL OUT!</div>
+            <div class="event-subtext" id="event-sub-text">INCREDIBLE TACKLE</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import './js/kabaddiEngine.js';
+
+        let lastSeenEvent = null;
+
+        function triggerFX(type, sub, theme) {
+            const overlay = document.getElementById('event-animation-overlay');
+            const main = document.getElementById('event-main-text');
+            const subT = document.getElementById('event-sub-text');
+            
+            overlay.className = 'event-overlay theme-' + (theme || 'point');
+            main.innerText = type;
+            subT.innerText = sub || '';
+            
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                overlay.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    overlay.style.animation = 'fadeIn 0.3s forwards';
+                }, 500);
+            }, 1800);
+        }
+
+        window.KabaddiEngine.initSync((state) => {
+            if (!state) return;
+            const { matchInfo, timeline } = state;
+
+            // Animation Check
+            if (matchInfo.lastEvent && matchInfo.lastEvent !== lastSeenEvent) {
+                const ev = matchInfo.lastEvent;
+                if (ev.includes('RAID')) triggerFX('SUCCESSFUL RAID!', 'NICE MOVE', 'point');
+                else if (ev.includes('TACKLE')) triggerFX('SUPER TACKLE!', 'DEFENSE IS ON FIRE', 'point');
+                else if (ev.includes('ALL_OUT')) triggerFX('ALL OUT!', 'TEAM SWEPT CLEAN', 'allout');
+                else if (ev.includes('BONUS')) triggerFX('BONUS!', 'EXTRA POINT ADDED', 'point');
+                lastSeenEvent = ev;
+            }
+
+            document.getElementById('name-a').innerText = matchInfo.teamA.name;
+            document.getElementById('name-b').innerText = matchInfo.teamB.name;
+            document.getElementById('score-a').innerText = matchInfo.teamA.score;
+            document.getElementById('score-b').innerText = matchInfo.teamB.score;
+
+            document.getElementById('raid-a').innerText = matchInfo.teamA.raidPoints;
+            document.getElementById('tackle-a').innerText = matchInfo.teamA.tacklePoints;
+            document.getElementById('bonus-a').innerText = matchInfo.teamA.bonusPoints;
+            document.getElementById('ao-a').innerText = matchInfo.teamA.allOutPoints;
+
+            document.getElementById('raid-b').innerText = matchInfo.teamB.raidPoints;
+            document.getElementById('tackle-b').innerText = matchInfo.teamB.tacklePoints;
+            document.getElementById('bonus-b').innerText = matchInfo.teamB.bonusPoints;
+            document.getElementById('ao-b').innerText = matchInfo.teamB.allOutPoints;
+
+            document.getElementById('kb-status').innerText = `${matchInfo.status} | HALF: ${matchInfo.half}`;
+
+            const tl = document.getElementById('kb-timeline');
+            tl.innerHTML = timeline.map(it => `
+                <div class="tl-item">
+                    <span><strong>${it.team}</strong> scored ${it.type}</span>
+                    <span style="color:var(--accent-blue); font-weight:900;">+${it.points}</span>
+                </div>
+            `).join('');
+        });
+    </script>
+</body>
+</html>

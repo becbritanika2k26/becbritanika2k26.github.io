@@ -47,8 +47,11 @@
 
     <div class="nav-hub"><a href="index.html" class="nav-link">🏠 HOME</a></div>
 
-    <div id="fx-overlay" class="event-overlay">
-        <div id="fx-text" class="event-card">FOUR</div>
+    <div id="event-animation-overlay" class="event-overlay">
+        <div class="event-content">
+            <div class="event-text" id="event-main-text">SIX!</div>
+            <div class="event-subtext" id="event-sub-text">WOW! WHAT A HIT</div>
+        </div>
     </div>
 
     <!-- Main Screens as before -->
@@ -134,15 +137,23 @@
             updateDisplay(state);
         });
 
-        function triggerFX(type) {
-            const overlay = document.getElementById('fx-overlay');
-            const text = document.getElementById('fx-text');
-            if (overlay && text) {
-                text.innerText = type;
-                text.className = 'event-card ' + type.toLowerCase();
-                overlay.style.display = 'flex';
-                setTimeout(() => { overlay.style.display = 'none'; }, 2000);
-            }
+        function triggerFX(type, sub) {
+            const overlay = document.getElementById('event-animation-overlay');
+            const main = document.getElementById('event-main-text');
+            const subT = document.getElementById('event-sub-text');
+            
+            overlay.className = 'event-overlay theme-' + type.toLowerCase();
+            main.innerText = type;
+            subT.innerText = sub || '';
+            
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                overlay.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    overlay.style.animation = 'fadeIn 0.3s forwards';
+                }, 500);
+            }, 2500);
         }
 
         function updateDisplay(state) {
@@ -155,9 +166,10 @@
 
             // Animation Check
             if (lastEvent && lastEvent !== lastLoggedEvent) {
-                if (['FOUR', 'SIX', 'WICKET', 'CENTURY', 'FIFTY'].includes(lastEvent)) {
-                    triggerFX(lastEvent);
-                }
+                if (lastEvent === 'FOUR') triggerFX('FOUR', 'CRACKING BOUNDARY!');
+                else if (lastEvent === 'SIX') triggerFX('SIX', 'OUT OF THE PARK!');
+                else if (lastEvent === 'WICKET') triggerFX('WICKET', 'OUT! BIG BREAKTHROUGH');
+                else if (['CENTURY', 'FIFTY'].includes(lastEvent)) triggerFX(lastEvent, 'INCREDIBLE PERFORMANCE!');
                 lastLoggedEvent = lastEvent;
             }
 

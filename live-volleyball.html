@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVE VOLLEYBALL | BRITANIKA 2K26</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <style>
+        .vb-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .main-score-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            text-align: center;
+            gap: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .team-vb h2 { font-size: 3rem; font-weight: 900; margin: 0; text-transform: uppercase; }
+        .team-vb .sets-badge { 
+            background: var(--accent-blue); 
+            color: #000; 
+            padding: 5px 15px; 
+            border-radius: 50px; 
+            font-weight: 900; 
+            font-size: 1rem;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .current-pts { font-size: 8rem; font-weight: 900; line-height: 1; margin: 20px 0; color: #fff; }
+        .serving-ball {
+            color: var(--accent-gold);
+            font-size: 1.5rem;
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes pulse { from { opacity: 0.3; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+        .set-history-tray {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .set-box {
+            background: rgba(255,255,255,0.05);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+        .set-box .label { font-size: 0.7rem; opacity: 0.5; font-weight: bold; margin-bottom: 5px; }
+        .set-box .score { font-weight: 900; font-size: 1.2rem; color: var(--accent-blue); }
+
+        .match-info-bar {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="vb-container">
+        <div class="match-info-bar" id="match-status-bar">LIVE: BEST OF 3 SETS</div>
+        
+        <div class="main-score-card">
+            <div class="team-vb">
+                <div id="serve-a" style="display:none;"><i class="fas fa-volleyball-ball serving-ball"></i></div>
+                <h2 id="name-a">TEAM A</h2>
+                <div class="sets-badge" id="sets-a">SETS: 0</div>
+                <div class="current-pts" id="pts-a">00</div>
+            </div>
+
+            <div style="font-size: 2rem; font-weight: 900; opacity: 0.2;">VS</div>
+
+            <div class="team-vb">
+                <div id="serve-b" style="display:none;"><i class="fas fa-volleyball-ball serving-ball"></i></div>
+                <h2 id="name-b">TEAM B</h2>
+                <div class="sets-badge" id="sets-b">SETS: 0</div>
+                <div class="current-pts" id="pts-b">00</div>
+            </div>
+        </div>
+
+        <div class="set-history-tray" id="history-tray">
+            <!-- Set History Boxes -->
+        </div>
+    </div>
+
+    <div id="event-animation-overlay" class="event-overlay">
+        <div class="event-content">
+            <div class="event-text" id="event-main-text">POINT!</div>
+            <div class="event-subtext" id="event-sub-text">GREAT PLAY</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import './js/volleyballEngine.js';
+
+        let lastSeenEvent = null;
+
+        function triggerFX(type, sub) {
+            const overlay = document.getElementById('event-animation-overlay');
+            const main = document.getElementById('event-main-text');
+            const subT = document.getElementById('event-sub-text');
+            
+            overlay.className = 'event-overlay theme-point';
+            main.innerText = type;
+            subT.innerText = sub || '';
+            
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                overlay.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    overlay.style.animation = 'fadeIn 0.3s forwards';
+                }, 500);
+            }, 1500);
+        }
+
+        window.VolleyballEngine.initSync((state) => {
+            if (!state) return;
+            const { matchInfo, currentSet, history, lastEvent } = state;
+
+            // Animation Check
+            if (lastEvent && lastEvent !== lastSeenEvent) {
+                if (lastEvent.startsWith('POINT')) triggerFX('POINT!', 'ADDING TO THE TALLY');
+                else if (lastEvent.startsWith('SET_WON')) triggerFX('SET WON!', 'DOMINATING THE COURT');
+                else if (lastEvent.startsWith('MATCH_WON')) triggerFX('MATCH OVER!', 'CONGRATULATIONS');
+                lastSeenEvent = lastEvent;
+            }
+
+            document.getElementById('name-a').innerText = matchInfo.teamA.name;
+            document.getElementById('name-b').innerText = matchInfo.teamB.name;
+            document.getElementById('sets-a').innerText = `SETS: ${matchInfo.teamA.setsWon}`;
+            document.getElementById('sets-b').innerText = `SETS: ${matchInfo.teamB.setsWon}`;
+            document.getElementById('pts-a').innerText = String(currentSet.teamA).padStart(2, '0');
+            document.getElementById('pts-b').innerText = String(currentSet.teamB).padStart(2, '0');
+
+            document.getElementById('serve-a').style.display = matchInfo.servingTeam === 'A' ? 'block' : 'none';
+            document.getElementById('serve-b').style.display = matchInfo.servingTeam === 'B' ? 'block' : 'none';
+
+            document.getElementById('match-status-bar').innerText = `${matchInfo.status}: SET ${matchInfo.currentSetNumber}`;
+
+            const tray = document.getElementById('history-tray');
+            tray.innerHTML = history.map(h => `
+                <div class="set-box">
+                    <div class="label">SET ${h.set}</div>
+                    <div class="score">${h.teamA} - ${h.teamB}</div>
+                </div>
+            `).join('');
+        });
+    </script>
+</body>
+</html>

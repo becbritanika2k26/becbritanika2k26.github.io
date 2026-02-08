@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KABADDI ADMIN | BRITANIKA 2K26</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <style>
+        .scoring-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .team-panel { background: rgba(30, 41, 59, 0.4); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .score-val { font-size: 4rem; font-weight: 900; color: var(--accent-blue); display: block; margin: 10px 0; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .kb-btn { padding: 12px; font-weight: 900; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #1e293b; color: #fff; cursor: pointer; transition: 0.2s; }
+        .kb-btn:hover { background: var(--accent-blue); color: #000; }
+        .allout-btn { grid-column: span 2; background: var(--accent-gold); color: #000; }
+        .timeline-item { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body class="admin-theme">
+    <div id="auth-wall" style="position: fixed; top:0; left:0; width:100%; height:100%; background: #020617; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+        <h2 style="color: #38bdf8;">ADMIN ACCESS REQUIRED</h2>
+        <a href="admin.html" class="btn-main" style="text-decoration: none; background: #38bdf8; color: #000; padding: 12px 25px; border-radius: 8px;">GO TO LOGIN PAGE</a>
+    </div>
+
+    <header class="admin-header" style="height: auto; padding: 15px 40px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="assets/logo.png" alt="Logo" style="width: 40px;">
+            <h1 style="margin: 0; font-size: 1.2rem;">KABADDI <span style="color: var(--primary);">SCORING SYSTEM</span></h1>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="live-kabaddi.html" target="_blank" class="btn-main" style="margin: 0; background: var(--accent-blue); color: #000; font-size: 0.7rem; padding: 8px 15px;">📺 TV VIEW</a>
+            <a href="admin.html" class="btn-main" style="margin: 0; background: rgba(255,255,255,0.1); color: #fff; font-size: 0.7rem; padding: 8px 15px;">BACK</a>
+        </div>
+    </header>
+
+    <div class="admin-layout" style="grid-template-columns: 300px 1fr;">
+        <aside class="card-panel">
+            <h2 style="color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 20px;">MATCH SETUP</h2>
+            <div class="input-group">
+                <label>TEAM A</label>
+                <input type="text" id="setup-team-a">
+            </div>
+            <div class="input-group">
+                <label>TEAM B</label>
+                <input type="text" id="setup-team-b">
+            </div>
+            <button onclick="initMatch()" class="btn-main btn-start">START NEW MATCH</button>
+            
+            <div style="margin-top: 30px;">
+                <label style="font-size: 0.7rem; color: var(--accent-blue); font-weight: 800;">MATCH STATUS</label>
+                <select id="match-status-sel" onchange="updateStatus()" class="btn-main" style="background:#1e293b; color:#fff; border: 1px solid #334155;">
+                    <option value="LIVE">LIVE MATCH</option>
+                    <option value="HALF_TIME">HALF TIME</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                </select>
+                <select id="match-half-sel" onchange="updateHalf()" class="btn-main" style="background:#1e293b; color:#fff; border: 1px solid #334155; margin-top:10px;">
+                    <option value="1">1ST HALF</option>
+                    <option value="2">2ND HALF</option>
+                </select>
+            </div>
+        </aside>
+
+        <main>
+            <div class="scoring-grid">
+                <!-- Team A -->
+                <div class="team-panel">
+                    <h2 id="team-a-name" style="margin:0;">TEAM A</h2>
+                    <span class="score-val" id="score-a">0</span>
+                    <div class="btn-grid">
+                        <button class="kb-btn" onclick="addPts('A', 'RAID', 1)">RAID +1</button>
+                        <button class="kb-btn" onclick="addPts('A', 'TACKLE', 1)">TACKLE +1</button>
+                        <button class="kb-btn" onclick="addPts('A', 'BONUS', 1)">BONUS +1</button>
+                        <button class="kb-btn" onclick="addPts('A', 'TECHNICAL', 1)">TECH +1</button>
+                        <button class="kb-btn allout-btn" onclick="addPts('A', 'ALL_OUT', 2)">ALL OUT (+2)</button>
+                    </div>
+                </div>
+
+                <!-- Team B -->
+                <div class="team-panel">
+                    <h2 id="team-b-name" style="margin:0; text-align:right;">TEAM B</h2>
+                    <span class="score-val" id="score-b" style="text-align:right;">0</span>
+                    <div class="btn-grid">
+                        <button class="kb-btn" onclick="addPts('B', 'RAID', 1)">RAID +1</button>
+                        <button class="kb-btn" onclick="addPts('B', 'TACKLE', 1)">TACKLE +1</button>
+                        <button class="kb-btn" onclick="addPts('B', 'BONUS', 1)">BONUS +1</button>
+                        <button class="kb-btn" onclick="addPts('B', 'TECHNICAL', 1)">TECH +1</button>
+                        <button class="kb-btn allout-btn" onclick="addPts('B', 'ALL_OUT', 2)">ALL OUT (+2)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-panel" style="margin-top: 20px;">
+                <h3>LIVE EVENT TIMELINE</h3>
+                <div id="timeline">
+                    <!-- Events -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import './js/adminController.js';
+        import './js/kabaddiEngine.js';
+
+        window.AdminController.initAuth((user) => {
+            if (user) {
+                document.getElementById('auth-wall').style.display = 'none';
+                window.KabaddiEngine.initSync((state) => refreshUI(state));
+            }
+        });
+
+        window.AdminController.initConnectionIndicator();
+
+        function refreshUI(state) {
+            if (!state) return;
+            const { matchInfo, timeline } = state;
+            
+            document.getElementById('team-a-name').innerText = matchInfo.teamA.name;
+            document.getElementById('team-b-name').innerText = matchInfo.teamB.name;
+            document.getElementById('score-a').innerText = matchInfo.teamA.score;
+            document.getElementById('score-b').innerText = matchInfo.teamB.score;
+            
+            document.getElementById('match-status-sel').value = matchInfo.status;
+            document.getElementById('match-half-sel').value = matchInfo.half;
+
+            const timeEl = document.getElementById('timeline');
+            timeEl.innerHTML = timeline.map(it => `
+                <div class="timeline-item">
+                    <span><strong>${it.team}</strong>: ${it.type}</span>
+                    <span style="color:var(--accent-blue); font-weight:900;">+${it.points}</span>
+                </div>
+            `).join('');
+        }
+
+        window.initMatch = () => {
+            window.KabaddiEngine.initMatch({
+                teamA: document.getElementById('setup-team-a').value,
+                teamB: document.getElementById('setup-team-b').value
+            });
+        };
+
+        window.addPts = (team, type, pts) => window.KabaddiEngine.addPoints(team, type, pts);
+        window.updateStatus = () => window.KabaddiEngine.updateStatus(document.getElementById('match-status-sel').value);
+        window.updateHalf = () => window.KabaddiEngine.setHalf(document.getElementById('match-half-sel').value);
+    </script>
+</body>
+</html>

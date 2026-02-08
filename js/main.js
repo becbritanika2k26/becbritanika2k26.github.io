@@ -17,6 +17,9 @@ window.mainController = {
         };
         checkReady();
 
+        // Subscribe to all Sports
+        this.initSportsSync();
+
         document.addEventListener('DOMContentLoaded', () => {
             this.setupMobileMenu();
         });
@@ -108,6 +111,41 @@ window.mainController = {
         }
     },
 
+
+    async initSportsSync() {
+        const { doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        const { db } = await import('./cloudConfig.js');
+
+        // Cricket
+        onSnapshot(doc(db, 'settings', 'cricketMatch'), (doc) => {
+            const state = doc.data();
+            this.checkLiveMatch(state);
+            const el = document.getElementById('cricket-mini-score');
+            if (el && state) {
+                const curKey = (state.matchInfo.battingFirst === state.matchInfo.teamA.name) ? (state.matchInfo.currentInnings === 1 ? 'teamA' : 'teamB') : (state.matchInfo.currentInnings === 1 ? 'teamB' : 'teamA');
+                const team = state.matchInfo[curKey];
+                el.innerText = `${team.name}: ${team.score}/${team.wickets} (${Math.floor(team.balls / 6)}.${team.balls % 6})`;
+            }
+        });
+
+        // Volleyball
+        onSnapshot(doc(db, 'settings', 'volleyballMatch'), (doc) => {
+            const state = doc.data();
+            const el = document.getElementById('volleyball-mini-score');
+            if (el && state) {
+                el.innerText = `${state.matchInfo.teamA.setsWon}-${state.matchInfo.teamB.setsWon} | Pts: ${state.currentSet.teamA}-${state.currentSet.teamB}`;
+            }
+        });
+
+        // Kabaddi
+        onSnapshot(doc(db, 'settings', 'kabaddiMatch'), (doc) => {
+            const state = doc.data();
+            const el = document.getElementById('kabaddi-mini-score');
+            if (el && state) {
+                el.innerText = `Score: ${state.matchInfo.teamA.score}-${state.matchInfo.teamB.score} (${state.matchInfo.status})`;
+            }
+        });
+    },
 
     checkLiveMatch(state) {
         const heroIndicator = document.getElementById('live-indicator-hero');
