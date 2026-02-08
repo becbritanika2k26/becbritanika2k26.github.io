@@ -1,315 +1,218 @@
-document.addEventListener('DOMContentLoaded', () => {
-    initScrollProgress();
-    initCountdown();
-    initMobileMenu();
-    initLiveUpdates();
-    initFloatingButton();
-    updateHomepageLiveFeed();
-});
+/**
+ * main.js - Central Website Logic for BEC Britanika 2K26
+ */
 
-async function updateHomepageLiveFeed() {
-    const container = document.getElementById('homepage-live-updates');
-    if (!container) return;
+window.mainController = {
+    isReady: false,
 
-    const updates = await window.DataManager.getUpdates();
-    if (updates.length === 0) {
-        container.innerHTML = '<p class="empty-msg">No recent updates.</p>';
-        return;
-    }
+    async init() {
+        // Wait for EventManager to have data
+        const checkReady = () => {
+            if (window.EventManager && window.EventManager._events.length > 0) {
+                this.isReady = true;
+                this.onManagerReady();
+            } else {
+                setTimeout(checkReady, 100);
+            }
+        };
+        checkReady();
 
-    container.innerHTML = updates.map(u => `
-        <div class="mini-update">
-            <span class="time"><i class="far fa-clock"></i> ${u.time}</span>
-            <p><strong>${u.title}</strong>: ${u.content}</p>
-        </div>
-    `).join('');
-}
-
-function reopenSpotlight() {
-    localStorage.removeItem('spotlight_last_seen');
-    if (typeof initSpotlight === 'function') {
-        initSpotlight();
-    } else {
-        location.reload();
-    }
-}
-
-// Floating Button Logic
-function initFloatingButton() {
-    const btn = document.createElement('button');
-    btn.className = 'floating-btn';
-    btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
-    document.body.appendChild(btn);
-
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 300) {
-            btn.classList.add('visible');
-        } else {
-            btn.classList.remove('visible');
-        }
-    });
-
-    btn.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-}
-
-// Scroll Progress Bar
-function initScrollProgress() {
-    const progressBar = document.createElement('div');
-    progressBar.id = 'scroll-progress';
-    document.body.prepend(progressBar);
-
-    window.addEventListener('scroll', () => {
-        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (winScroll / height) * 100;
-        progressBar.style.width = scrolled + "%";
-    });
-}
-
-// Countdown Timer
-function initCountdown() {
-    const savedDate = localStorage.getItem('bec_britanika_target_date');
-    const targetDateStr = savedDate || 'February 7, 2026 09:00:00';
-    const targetDate = new Date(targetDateStr).getTime();
-    const countdownItems = {
-        days: document.getElementById('days'),
-        hours: document.getElementById('hours'),
-        minutes: document.getElementById('minutes'),
-        seconds: document.getElementById('seconds')
-    };
-
-    if (!countdownItems.days) return;
-
-    const timer = setInterval(() => {
-        const now = new Date().getTime();
-        const distance = targetDate - now;
-
-        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((distance % (1000 * 60)) / 1000);
-
-        countdownItems.days.innerText = d.toString().padStart(2, '0');
-        countdownItems.hours.innerText = h.toString().padStart(2, '0');
-        countdownItems.minutes.innerText = m.toString().padStart(2, '0');
-        countdownItems.seconds.innerText = s.toString().padStart(2, '0');
-
-        if (distance < 0) {
-            clearInterval(timer);
-            document.querySelector('.countdown').innerHTML = "<h2>EVENT STARTED!</h2>";
-        }
-    }, 1000);
-}
-
-
-// Mobile Menu
-function initMobileMenu() {
-    const btn = document.querySelector('.mobile-menu-btn');
-    const nav = document.querySelector('.nav-links');
-    if (btn) {
-        btn.addEventListener('click', () => {
-            nav.classList.toggle('active');
+        // Standard listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            this.setupMobileMenu();
+            if (window.checkLiveMatch) window.checkLiveMatch();
         });
+    },
+
+    onManagerReady() {
+        console.log("MainController: Manager Ready, initial rendering...");
+        // Auto-run rendering if containers exist
+        this.autoRender();
+    },
+
+    autoRender() {
+        const containers = {
+            'sports-container': 'sports',
+            'cultural-container': 'cultural',
+            'other-events-container': 'other-events'
+        };
+
+        Object.keys(containers).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) this.renderCards(id, containers[id]);
+        });
+    },
+
+    renderCards(containerId, category) {
+        if (!this.isReady) {
+            setTimeout(() => this.renderCards(containerId, category), 200);
+            return;
+        }
+
+        const events = window.EventManager.getEvents().filter(e =>
+            e.category === category ||
+            (e._source && e._source === category) ||
+            e.category.toLowerCase().includes(category.toLowerCase())
+        );
+
+        const container = document.getElementById(containerId);
+        if (container) {
+            if (events.length === 0) {
+                container.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align: center;">No events scheduled in this category yet.</div>`;
+            } else {
+                container.innerHTML = events.map(e => window.Renderer.renderEventCard(e)).join('');
+            }
+        }
+    },
+
+    setupMobileMenu() {
+        const btn = document.querySelector('.mobile-menu-btn');
+        const nav = document.querySelector('.nav-links');
+        if (btn && nav) {
+            btn.onclick = () => nav.classList.toggle('active');
+        }
     }
-}
+};
 
-// Live Updates Ticker
-async function initLiveUpdates() {
-    const ticker = document.querySelector('.ticker-content');
-    if (!ticker) return;
+/**
+ * GLOBAL FUNCTIONS (To support old inline HTML calls)
+ */
+window.renderCards = (containerId, category) => window.mainController.renderCards(containerId, category);
 
-    const updates = await window.DataManager.getUpdates();
-    ticker.innerHTML = updates.map(u => `<span> • ${u.title}: ${u.content} </span>`).join(' ');
-}
+window.openEventDetail = (id) => {
+    const event = window.EventManager.getEventById(id);
+    if (!event) return;
 
-// Global cache for event data to avoid large string issues in HTML attributes
-window._eventCache = {};
+    const overlay = document.getElementById('modal-overlay');
+    const content = document.getElementById('modal-content');
+    if (!overlay || !content) return;
 
-// Render Event Cards
-async function renderCards(containerId, fetchMethod) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    const data = await fetchMethod();
-
-    // Cache data
-    data.forEach(item => {
-        window._eventCache[item.id] = item;
-    });
-
-    container.innerHTML = data.map(item => {
-        const totalParticipants = Array.isArray(item.participants)
-            ? item.participants.length
-            : Object.values(item.participants).flat().length;
-
-        return `
-            <div class="card" onclick="openModal('${item.id}')">
-                <h3>${item.name}</h3>
-                <div class="meta">
-                    <span><i class="far fa-calendar"></i> ${item.date}</span>
-                    <span><i class="far fa-clock"></i> ${item.time}</span>
-                    <span><i class="fas fa-users"></i> ${totalParticipants} Participants</span>
-                </div>
-                <div class="category">${item.category}</div>
-                ${item.result ? `<div class="result">Result: ${item.result}</div>` : ''}
-            </div>
-        `;
-    }).join('');
-}
-
-// Helper to safely open/download PDFs (handles Base64 strings and paths)
-function openPDF(pathOrData) {
-    if (!pathOrData) return;
-
-    if (pathOrData.startsWith('data:')) {
-        // Create a temporary link to download Base64 PDF
-        const link = document.createElement('a');
-        link.href = pathOrData;
-        link.download = 'participants_list.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    } else {
-        window.open(pathOrData, '_blank');
-    }
-}
-
-// Modal System
-function openModal(itemId) {
-    const item = window._eventCache[itemId];
-    if (!item) return;
-
-    const modalOverlay = document.getElementById('modal-overlay');
-    const modalContent = document.getElementById('modal-content');
-
-    const isArrayParticipant = Array.isArray(item.participants);
-    const totalParticipants = isArrayParticipant
-        ? item.participants.length
-        : Object.values(item.participants).flat().length;
-
-    modalContent.innerHTML = `
-        <span class="modal-close" onclick="closeModal()">&times;</span>
-        <h2 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 1.8rem;">${item.name}</h2>
-        ${item.image ? `<img src="${item.image}" alt="${item.name}" class="modal-image" style="width: 100%; height: 200px; object-fit: cover; border-radius: 15px; margin-bottom: 1.5rem; border: 1px solid var(--glass-border);">` : ''}
-        <div class="modal-meta-grid">
-            <div class="meta-item"><i class="far fa-calendar"></i> ${item.date}</div>
-            <div class="meta-item"><i class="far fa-clock"></i> ${item.time}</div>
-            <div class="meta-item"><i class="fas fa-map-marker-alt"></i> ${item.venue}</div>
-            <div class="meta-item"><i class="fas fa-users"></i> ${totalParticipants} Participants</div>
+    content.innerHTML = `
+        <span class="modal-close" onclick="closeEventModal()">&times;</span>
+        <div class="modal-header-img">
+            <img src="${event.image}" onerror="this.src='assets/default-event.png'" style="width: 100%; height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 20px;">
         </div>
-
-        <div class="modal-tabs">
-            <button class="tab-btn active" onclick="switchModalTab(this, 'details')">Details</button>
-            <button class="tab-btn" onclick="switchModalTab(this, 'participants')">Participants</button>
-            ${item.brackets || item.schedule ? `<button class="tab-btn" onclick="switchModalTab(this, 'brackets')">Brackets/Schedule</button>` : ''}
-            <button class="tab-btn" onclick="switchModalTab(this, 'results')">Results</button>
+        <h2 style="color: var(--primary); margin-bottom: 5px;">${event.name}</h2>
+        <div style="display: flex; gap: 15px; font-size: 0.9rem; margin-bottom: 20px; color: var(--text-dim);">
+            <span><i class="far fa-calendar-alt"></i> ${event.date}</span>
+            <span><i class="far fa-clock"></i> ${event.time}</span>
+            <span><i class="fas fa-map-marker-alt"></i> ${event.venue}</span>
         </div>
-
-        <div id="modal-tab-content">
-            <div id="details" class="tab-pane active">
-                <p style="margin-bottom: 1rem;"><strong>Category:</strong> ${item.category}</p>
-                <p>Welcome to ${item.name}. Join us for an exciting competition at Britanika 2K26.</p>
-                ${item.participants_pdf ? `
-                    <div style="margin-top: 2rem;">
-                        <button onclick="openPDF('${item.participants_pdf.replace(/'/g, "\\'")}')" class="btn btn-download" style="width: auto;">
-                            <i class="fas fa-file-pdf"></i> View Participants List
-                        </button>
-                    </div>
-                ` : ''}
-            </div>
+        <div class="modal-body" style="line-height: 1.6;">
+            <h3>Event Description</h3>
+            <p>Join us for the ${event.name} at BEC Britanika 2K26. Experience the competition and spirit of excellence.</p>
             
-            <div id="participants" class="tab-pane">
-                <div class="search-container">
-                    <input type="text" id="participant-search" placeholder="Search names..." onkeyup="filterParticipants()">
-                </div>
-                <div id="participants-list" class="styled-list">
-                    ${renderParticipants(item.participants)}
-                </div>
-            </div>
+            ${event.participants && event.participants.length > 0 ? `
+                <h3 style="margin-top: 20px;">Participants</h3>
+                <ul style="padding-left: 20px; color: var(--text-dim);">
+                    ${event.participants.map(p => `<li>${p}</li>`).join('')}
+                </ul>
+            ` : ''}
 
-            <div id="brackets" class="tab-pane">
-                <div class="styled-list">
-                    ${item.brackets ? renderBrackets(item.brackets) : (item.schedule ? renderSchedule(item.schedule) : 'No bracket available.')}
-                </div>
-            </div>
-
-            <div id="results" class="tab-pane">
-                <div class="result-placeholder">
-                    ${item.result ? `<div class="result-card"><h3>Winner</h3><p>${item.result}</p></div>` : '<p>The results will be updated as soon as the event concludes. Stay tuned!</p>'}
-                </div>
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                 <button class="btn btn-primary" onclick="window.print()">Download Schedule</button>
             </div>
         </div>
     `;
+    overlay.style.display = 'flex';
+};
 
-    modalOverlay.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+window.closeEventModal = () => {
+    const overlay = document.getElementById('modal-overlay');
+    if (overlay) overlay.style.display = 'none';
+};
+
+// Start
+// -----------------------------------------------------------------
+// COUNTDOWN TIMER
+// -----------------------------------------------------------------
+function initCountdown() {
+    const countdown = () => {
+        const targetRaw = localStorage.getItem('bec_britanika_target_date') || 'February 7, 2026 09:00:00';
+        const countDate = new Date(targetRaw).getTime();
+        const now = new Date().getTime();
+        const gap = countDate - now;
+
+        const second = 1000, minute = second * 60, hour = minute * 60, day = hour * 24;
+
+        if (gap < 0) {
+            if (document.getElementById('days')) {
+                document.getElementById('days').innerText = '00';
+                document.getElementById('hours').innerText = '00';
+                document.getElementById('minutes').innerText = '00';
+                document.getElementById('seconds').innerText = '00';
+            }
+            return;
+        }
+
+        const d = Math.floor(gap / day);
+        const h = Math.floor((gap % day) / hour);
+        const m = Math.floor((gap % hour) / minute);
+        const s = Math.floor((gap % minute) / second);
+
+        if (document.getElementById('days')) {
+            document.getElementById('days').innerText = d < 10 ? '0' + d : d;
+            document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+            document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
+            document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
+        }
+    };
+    setInterval(countdown, 1000);
+    countdown();
 }
 
-function renderParticipants(participants) {
-    if (Array.isArray(participants)) {
-        if (participants.length === 0) return '<p class="empty-msg">TBA</p>';
-        return participants.map(p => `<div class="participant-item">${p}</div>`).join('');
+window.mainController.init();
+document.addEventListener('DOMContentLoaded', initCountdown);
+let demoInterval = null;
+window.toggleDemoMode = () => {
+    const btn = document.getElementById('demo-btn-text');
+    if (demoInterval) {
+        clearInterval(demoInterval);
+        demoInterval = null;
+        if (btn) { btn.innerText = "Start Simulation"; btn.classList.remove('btn-danger'); }
+        alert("Simulation Stopped.");
     } else {
-        let html = '';
-        for (const [cat, list] of Object.entries(participants)) {
-            html += `<h4 class="cat-title">${cat}</h4>`;
-            html += list.length > 0
-                ? list.map(p => `<div class="participant-item">${p}</div>`).join('')
-                : '<p class="empty-msg">No entries</p>';
-        }
-        return html;
+        const demoState = {
+            matchInfo: { teamA: { name: 'BEC KINGS', score: 0, wickets: 0, balls: 0, scorecard: [] }, teamB: { name: 'TECH GIANTS', score: 0, wickets: 0, balls: 0, scorecard: [] }, totalOvers: 5, battingFirst: 'BEC KINGS', currentInnings: 1, status: 'LIVE' },
+            batting: { striker: { name: 'Demo King', runs: 0, balls: 0 }, nonStriker: { name: 'Pro Batsman', runs: 0, balls: 0 } },
+            bowling: { currentBowler: { name: 'Rocket Bowler', runs: 0, wickets: 0, balls: 0 } },
+            recentBalls: [],
+        };
+        localStorage.setItem('britanika_current_match', JSON.stringify(demoState));
+        demoInterval = setInterval(() => {
+            let data = JSON.parse(localStorage.getItem('britanika_current_match'));
+            const options = [0, 1, 2, 4, 6, 'W'];
+            const res = options[Math.floor(Math.random() * options.length)];
+            const team = data.matchInfo.teamA;
+            if (res === 'W') { team.wickets++; team.balls++; data.matchInfo.lastEvent = 'WICKET'; data.recentBalls.push('W'); }
+            else {
+                const r = typeof res === 'number' ? res : 0;
+                team.score += r; team.balls++; data.batting.striker.runs += r;
+                data.recentBalls.push(res); if (r === 4) data.matchInfo.lastEvent = 'FOUR'; if (r === 6) data.matchInfo.lastEvent = 'SIX';
+            }
+            if (data.recentBalls.length > 6) data.recentBalls.shift();
+            localStorage.setItem('britanika_current_match', JSON.stringify(data));
+            if (window.checkLiveMatch) window.checkLiveMatch();
+        }, 3000);
+        if (btn) { btn.innerText = "Running..."; btn.classList.add('btn-danger'); }
     }
-}
+};
 
-function renderBrackets(brackets) {
-    return brackets.map(b => `
-        <div class="match-item">
-            <span class="match-name">${b.match}</span>
-            <span class="match-teams">${b.teams}</span>
-            <span class="match-time">${b.time}</span>
-        </div>
-    `).join('');
-}
-
-function renderSchedule(schedule) {
-    return schedule.map(s => `
-        <div class="match-item">
-            <span class="match-name">${s.match}</span>
-            <span class="match-time">${s.date ? s.date + ' | ' : ''}${s.time}</span>
-        </div>
-    `).join('');
-}
-
-function switchModalTab(btn, tabId) {
-    const modal = btn.closest('.modal');
-    modal.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    modal.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-
-    btn.classList.add('active');
-    document.getElementById(tabId).classList.add('active');
-}
-
-function filterParticipants() {
-    const query = document.getElementById('participant-search').value.toLowerCase();
-    const items = document.querySelectorAll('.participant-item');
-    items.forEach(item => {
-        if (item.textContent.toLowerCase().includes(query)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
+window.checkLiveMatch = () => {
+    const raw = localStorage.getItem('britanika_current_match');
+    const heroIndicator = document.getElementById('live-indicator-hero');
+    const hubIndicator = document.getElementById('hub-live-status');
+    if (raw) {
+        const state = JSON.parse(raw);
+        if (state.matchInfo && state.matchInfo.status === 'LIVE') {
+            const { teamA, teamB, currentInnings } = state.matchInfo;
+            const curTeam = (state.matchInfo.battingFirst === teamA.name) ? (currentInnings === 1 ? teamA : teamB) : (currentInnings === 1 ? teamB : teamA);
+            const scoreText = `${teamA.name} vs ${teamB.name} | ${curTeam.score}/${curTeam.wickets}`;
+            if (heroIndicator) { heroIndicator.style.display = 'flex'; const txt = heroIndicator.querySelector('.live-match-text'); if (txt) txt.innerText = scoreText; }
+            if (hubIndicator) { hubIndicator.innerHTML = `<span class="status-badge status-live" style="font-size: 0.6rem;">LIVE: ${scoreText}</span>`; }
+            return;
         }
-    });
-}
-
-function closeModal() {
-    document.getElementById('modal-overlay').style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-window.openModal = openModal;
-window.closeModal = closeModal;
-window.renderCards = renderCards;
-window.switchModalTab = switchModalTab;
-window.filterParticipants = filterParticipants;
+    }
+    if (heroIndicator) heroIndicator.style.display = 'none';
+    if (hubIndicator) hubIndicator.innerHTML = '';
+};

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVE BROADCAST | BEC Britanika 2K26</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <style>
+        .nav-hub { position: fixed; top: 15px; right: 15px; z-index: 100; }
+        .nav-link { background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 6px; color: white; text-decoration: none; font-size: 0.7rem; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        
+        body.broadcast-theme {
+            background: #00040a;
+            background: radial-gradient(circle at center, #0a1128 0%, #00040a 100%);
+            overflow-y: auto;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ANIMATION OVERLAYS */
+        .event-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2000; display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.4); pointer-events: none;
+        }
+        .event-card {
+            font-size: 8rem; font-weight: 900; color: #fff; text-shadow: 0 0 50px rgba(255,255,255,0.5);
+            animation: bounceIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .event-card.four { color: var(--accent-blue); text-shadow: 0 0 30px var(--accent-blue); }
+        .event-card.six { color: var(--accent-green); text-shadow: 0 0 30px var(--accent-green); }
+        .event-card.wicket { color: var(--accent-red); text-shadow: 0 0 30px var(--accent-red); }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .scorecard-mini { font-size: 0.8rem; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+        .score-row { display: flex; justify-content: space-between; margin-bottom: 5px; color: #94a3b8; }
+    </style>
+</head>
+<body class="broadcast-theme">
+
+    <div class="nav-hub"><a href="index.html" class="nav-link">🏠 HOME</a></div>
+
+    <div id="fx-overlay" class="event-overlay">
+        <div id="fx-text" class="event-card">FOUR</div>
+    </div>
+
+    <!-- Main Screens as before -->
+    <div class="broadcast-container">
+        <div class="glass-panel scoreboard-main">
+            <div class="team-info">
+                <div class="team-logo"><img src="assets/logo.png" style="width: 40px;"></div>
+                <div class="team-details">
+                    <h2 id="team-a-name">-</h2>
+                    <span class="status-badge status-live">BROADCAST</span>
+                </div>
+            </div>
+            <div class="center-score">
+                <div id="main-score-display" class="big-score">0/0</div>
+                <div id="current-overs" class="overs-display">0.0 OVERS</div>
+            </div>
+            <div class="team-info" style="justify-content: flex-end; text-align: right;">
+                <div class="team-details">
+                    <h2 id="team-b-name">-</h2>
+                    <div id="target-info" style="font-size: 1rem; color: var(--accent-gold); font-weight: 900;"></div>
+                </div>
+                <div class="team-logo"><img src="assets/logo.png" style="width: 40px;"></div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-label">CURRENT BATTING</span>
+                <div style="border-left: 4px solid var(--accent-blue); padding-left: 12px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span id="striker-name" style="font-size: 1.5rem; font-weight: 900;">-</span>
+                        <span id="striker-runs" style="font-size: 1.5rem; font-weight: 900; color: var(--accent-blue);">0 (0)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; opacity: 0.6; margin-top: 10px;">
+                        <span id="non-striker-name">-</span>
+                        <span id="non-striker-runs">0 (0)</span>
+                    </div>
+                </div>
+                <div class="stat-label">SCORECARD</div>
+                <div id="scorecard-mini" class="scorecard-mini">
+                    <!-- History here -->
+                </div>
+            </div>
+
+            <div class="stat-box" style="text-align: center;">
+                <span class="stat-label">LAST 6 BALLS</span>
+                <div class="recent-balls-tray" id="recent-balls-container"></div>
+                <div id="rr-info" style="margin-top: 20px; font-size: 1.4rem; font-weight: 900; color: var(--accent-blue);">CRR: 0.00</div>
+            </div>
+
+            <div class="stat-box">
+                <span class="stat-label">BOWLING</span>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div id="bowler-name" style="font-size: 1.5rem; font-weight: 900;">BOWLER</div>
+                        <div id="bowler-stats" style="color: var(--text-dim); font-weight: bold;">0-0 (0.0)</div>
+                    </div>
+                </div>
+                <div id="bowler-econ-p" style="margin-top: 15px; background: rgba(0,229,255,0.1); padding: 10px; border-radius: 8px; color: var(--accent-blue); text-align: center; font-weight: 900;">ECON: 0.00</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Break/Win same as before -->
+    <div id="big-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; text-align: center;">
+        <h1 id="overlay-title" style="color: var(--accent-blue); font-size: 4rem; font-weight: 900; margin-bottom: 10px;">BREAK</h1>
+        <h2 id="overlay-score" style="font-size: 3.5rem; margin-bottom: 20px; color: #fff;">0/0</h2>
+        <h3 id="overlay-sub" style="color: var(--accent-gold); font-size: 1.5rem;">TARGET: 0</h3>
+    </div>
+
+    <script src="js/storageManager.js"></script>
+    <script src="js/cricketEngine.js"></script>
+    <script>
+        let lastLoggedEvent = null;
+
+        function triggerFX(type) {
+            const overlay = document.getElementById('fx-overlay');
+            const text = document.getElementById('fx-text');
+            text.innerText = type;
+            text.className = 'event-card ' + type.toLowerCase();
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.style.display = 'none'; }, 2000);
+        }
+
+        function updateDisplay() {
+            const state = window.CricketEngine.load();
+            if(!state) return;
+
+            const { teamA, teamB, currentInnings, target, status, lastEvent } = state.matchInfo;
+            const curKey = (state.matchInfo.battingFirst === teamA.name) ? (currentInnings === 1 ? 'teamA' : 'teamB') : (currentInnings === 1 ? 'teamB' : 'teamA');
+            const curTeam = state.matchInfo[curKey];
+
+            // Animation Check
+            if (lastEvent && lastEvent !== lastLoggedEvent) {
+                if (['FOUR', 'SIX', 'WICKET', 'CENTURY', 'FIFTY'].includes(lastEvent)) {
+                    triggerFX(lastEvent);
+                }
+                lastLoggedEvent = lastEvent;
+            }
+
+            // Standard HUD
+            document.getElementById('main-score-display').innerText = curTeam.score + "/" + curTeam.wickets;
+            document.getElementById('current-overs').innerText = Math.floor(curTeam.balls/6) + "." + (curTeam.balls%6) + " OVERS";
+            document.getElementById('team-a-name').innerText = teamA.name;
+            document.getElementById('team-b-name').innerText = teamB.name;
+
+            // Player Stats
+            document.getElementById('striker-name').innerText = state.batting.striker.name + "*";
+            document.getElementById('striker-runs').innerText = state.batting.striker.runs + " (" + state.batting.striker.balls + ")";
+            document.getElementById('non-striker-name').innerText = state.batting.nonStriker.name;
+            document.getElementById('non-striker-runs').innerText = state.batting.nonStriker.runs + " (" + state.batting.nonStriker.balls + ")";
+
+            // Scorecard
+            const sc = document.getElementById('scorecard-mini');
+            sc.innerHTML = '';
+            curTeam.scorecard.slice(-5).forEach(p => {
+                const row = document.createElement('div');
+                row.className = 'score-row';
+                row.innerHTML = `<span>${p.name}</span> <span>${p.runs}(${p.balls}) - ${p.outType}</span>`;
+                sc.appendChild(row);
+            });
+
+            // Bowler
+            const b = state.bowling.currentBowler;
+            document.getElementById('bowler-name').innerText = b.name;
+            document.getElementById('bowler-stats').innerText = b.wickets + "-" + b.runs + " (" + (Math.floor(b.balls/6) + "." + (b.balls%6)) + ")";
+            document.getElementById('bowler-econ-p').innerText = "ECON: " + (b.balls > 0 ? ((b.runs/b.balls)*6).toFixed(2) : "0.00");
+
+            // Overlays
+            const bigO = document.getElementById('big-overlay');
+            if(status === 'BREAK') {
+                bigO.style.display = 'flex';
+                document.getElementById('overlay-title').innerText = "INNINGS COMPLETED";
+                document.getElementById('overlay-score').innerText = curTeam.score + "/" + curTeam.wickets;
+                document.getElementById('overlay-sub').innerText = "TARGET: " + (curTeam.score + 1);
+            } else if(status === 'COMPLETED') {
+                bigO.style.display = 'flex';
+                document.getElementById('overlay-title').innerText = "MATCH OVER";
+                document.getElementById('overlay-score').innerText = "CONGRATULATIONS";
+                document.getElementById('overlay-sub').innerText = "Check Scorecard for Results";
+            } else {
+                bigO.style.display = 'none';
+            }
+
+            if(target) document.getElementById('target-info').innerText = "TARGET: " + target;
+        }
+
+        window.onload = function() { updateDisplay(); setInterval(updateDisplay, 1000); };
+    </script>
+</body>
+</html>

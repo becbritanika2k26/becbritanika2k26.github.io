@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRICKET ADMIN | BRITANIKA 2K26</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/broadcast.css">
+</head>
+<body class="admin-theme" style="display: none;">
+    <script src="js/storageManager.js"></script>
+    <script src="js/cricketEngine.js"></script>
+
+    <script>
+        if (sessionStorage.getItem('admin_auth') === "2026") {
+            document.body.style.display = 'block';
+        } else {
+            const pin = prompt("ENTER ADMIN ACCESS PIN (2026):");
+            if (pin === "2026") {
+                sessionStorage.setItem('admin_auth', '2026');
+                document.body.style.display = 'block';
+            } else {
+                alert("ACCESS DENIED");
+                window.location.href = "index.html";
+            }
+        }
+    </script>
+
+    <!-- Innings Break Overlay -->
+    <div id="break-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box;">
+        <div class="card-panel" style="max-width: 400px; width: 100%; text-align: center;">
+            <h1 style="color: var(--accent-blue); margin-bottom: 10px;">INNINGS OVER!</h1>
+            <h2 id="final-innings-score" style="font-size: 3rem; margin-bottom: 20px; color: #fff;">0/0</h2>
+            <div id="target-msg" style="margin-bottom: 20px; font-weight: bold; color: var(--accent-gold);">TARGET: 0</div>
+            <button onclick="startInnings2()" class="btn-main btn-start">START 2ND INNINGS ▶</button>
+            <button onclick="hideOverlay()" style="background:transparent; color:#94a3b8; border:none; margin-top:10px; cursor:pointer;">Close for now</button>
+        </div>
+    </div>
+
+    <!-- Match Over Overlay -->
+    <div id="match-over-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box;">
+        <div class="card-panel" style="max-width: 400px; width: 100%; text-align: center;">
+            <h1 style="color: var(--accent-green); margin-bottom: 10px;">MATCH OVER!</h1>
+            <h2 id="match-winner-text" style="font-size: 2rem; margin-bottom: 20px; color: #fff;">WINNER</h2>
+            <button onclick="resetMatch()" class="btn-main btn-reset">RESET SYSTEM</button>
+        </div>
+    </div>
+
+    <div class="admin-layout">
+        <aside class="card-panel">
+            <h2 style="margin-bottom: 20px; color: var(--accent-blue);">1. MATCH SETUP</h2>
+            <div class="input-group">
+                <label>TEAM A (Batting First)</label>
+                <input type="text" id="setup-team-a" placeholder="e.g. B-TECH 1ST YEAR">
+            </div>
+            <div class="input-group">
+                <label>TEAM B (Bowling First)</label>
+                <input type="text" id="setup-team-b" placeholder="e.g. B-TECH 2ND YEAR">
+            </div>
+            <div class="input-group">
+                <label>MATCH OVERS</label>
+                <input type="number" id="setup-overs" value="10">
+            </div>
+            <button id="main-start-btn" class="btn-main btn-start">▶ INITIALIZE MATCH</button>
+            <button id="main-reset-btn" class="btn-main btn-reset">🗑 HARD RESET SYSTEM</button>
+            
+            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+            <label style="font-size: 0.7rem; color: var(--accent-blue); font-weight: 800;">MANUAL OVERRIDE (Optional)</label>
+            <div class="input-group" style="margin-top: 10px;">
+                <input type="text" id="manual-striker" placeholder="Type Striker Name">
+            </div>
+            <div class="input-group">
+                <input type="text" id="manual-bowler" placeholder="Type Bowler Name">
+            </div>
+            <button onclick="forceSetPlayers()" class="btn-main" style="background: #1e293b; color: #fff; font-size: 0.7rem;">APPLY NAMES</button>
+        </aside>
+
+        <main>
+            <div class="card-panel" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h3 id="match-display-title" style="margin:0; font-size: 1.2rem;">READY</h3>
+                    <span id="status-pill" class="status-badge status-live">LIVE</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <a href="live-score.html" target="_blank" style="text-decoration: none; padding: 10px 15px; background: var(--accent-blue); color: #000; border-radius: 8px; font-weight: 900; font-size: 0.7rem;">📺 TV VIEW</a>
+                    <a href="index.html" style="text-decoration: none; padding: 10px 15px; background: rgba(255,255,255,0.1); color: #fff; border-radius: 8px; font-weight: 900; font-size: 0.7rem;">🏠 EXIT</a>
+                </div>
+            </div>
+
+            <div class="card-panel" style="margin-bottom: 20px; text-align: center;">
+                <div class="live-banner" id="score-val">0/0</div>
+                <div style="color: var(--accent-blue); font-size: 1.5rem; font-weight: 900; margin-top: 5px;" id="overs-val">0.0 OVERS</div>
+                <div id="target-val" style="color: var(--accent-gold); font-weight: 800; font-size: 1.3rem; margin-top: 10px;"></div>
+            </div>
+
+            <div class="card-panel">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px;">
+                    <div class="input-group">
+                        <label>STRIKER</label>
+                        <select id="sel-striker" class="p-sync"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>NON-STRIKER</label>
+                        <select id="sel-non-striker" class="p-sync"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>BOWLER</label>
+                        <select id="sel-bowler" class="p-sync"></select>
+                    </div>
+                </div>
+
+                <div class="scoring-grid">
+                    <button class="score-btn" onclick="addRun(0)">0</button>
+                    <button class="score-btn" onclick="addRun(1)">1</button>
+                    <button class="score-btn" onclick="addRun(2)">2</button>
+                    <button class="score-btn" onclick="addRun(3)">3</button>
+                    <button class="score-btn" onclick="addRun(4)" style="color: var(--accent-blue); border-color: var(--accent-blue);">4</button>
+                    <button class="score-btn" onclick="addRun(6)" style="color: var(--accent-green); border-color: var(--accent-green);">6</button>
+                    <button class="score-btn" onclick="addSpecial('WIDE')">WD</button>
+                    <button class="score-btn" onclick="addSpecial('NO_BALL')">NB</button>
+                    <button class="score-btn wicket" onclick="addSpecial('WICKET')" style="grid-column: span 2;">WICKET</button>
+                    <button class="score-btn" onclick="undoLast()" style="grid-column: span 2;">UNDO</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function refreshUI() {
+            const state = window.CricketEngine.load();
+            if(!state) return;
+
+            const { teamA, teamB, currentInnings, status, target } = state.matchInfo;
+            const curTeam = (state.matchInfo.battingFirst === teamA.name) ? (currentInnings === 1 ? teamA : teamB) : (currentInnings === 1 ? teamB : teamA);
+
+            document.getElementById('score-val').innerText = curTeam.score + "/" + curTeam.wickets;
+            document.getElementById('overs-val').innerText = Math.floor(curTeam.balls/6) + "." + (curTeam.balls%6) + " OVERS";
+            document.getElementById('match-display-title').innerText = teamA.name + " VS " + teamB.name;
+            
+            const pill = document.getElementById('status-pill');
+            if(status === 'BREAK') {
+                pill.innerText = "BREAK"; pill.className = "status-badge status-break";
+                document.getElementById('break-overlay').style.display = 'flex';
+                document.getElementById('final-innings-score').innerText = curTeam.score + "/" + curTeam.wickets;
+                document.getElementById('target-msg').innerText = "TARGET: " + (curTeam.score + 1);
+            } else if(status === 'COMPLETED') {
+                pill.innerText = "DONE"; pill.className = "status-badge status-break";
+                document.getElementById('match-over-overlay').style.display = 'flex';
+                const winner = determineWinner(state);
+                document.getElementById('match-winner-text').innerText = winner + " WON!";
+            } else {
+                pill.innerText = "LIVE"; pill.className = "status-badge status-live";
+                document.getElementById('break-overlay').style.display = 'none';
+                document.getElementById('match-over-overlay').style.display = 'none';
+            }
+
+            if(target) document.getElementById('target-val').innerText = "TARGET: " + target;
+        }
+
+        function determineWinner(state) {
+            const { teamA, teamB, battingFirst, target } = state.matchInfo;
+            const scoringTeamKey = (battingFirst === teamA.name) ? 'teamB' : 'teamA';
+            const battingTeam = state.matchInfo[scoringTeamKey];
+            const bowlingTeam = state.matchInfo[(scoringTeamKey === 'teamA' ? 'teamB' : 'teamA')];
+            if(battingTeam.score >= target) return battingTeam.name;
+            return bowlingTeam.name;
+        }
+
+        function forceSetPlayers() {
+            window.CricketEngine.setActivePlayers(document.getElementById('manual-striker').value, '', document.getElementById('manual-bowler').value);
+            refreshUI();
+            alert("Names applied!");
+        }
+
+        function addRun(val) { window.CricketEngine.addBall('RUNS', val); refreshUI(); }
+        function addSpecial(type) { window.CricketEngine.addBall(type); refreshUI(); }
+        function undoLast() { window.CricketEngine.undo(); refreshUI(); }
+        function startInnings2() { window.CricketEngine.startNextInnings(); location.reload(); }
+        function resetMatch() { window.StorageManager.clearAll(); location.reload(); }
+        function hideOverlay() { document.getElementById('break-overlay').style.display='none'; }
+
+        document.getElementById('main-start-btn').onclick = function() {
+            window.CricketEngine.initMatch({ 
+                teamA: document.getElementById('setup-team-a').value || 'TEAM A', 
+                teamB: document.getElementById('setup-team-b').value || 'TEAM B', 
+                totalOvers: parseInt(document.getElementById('setup-overs').value), 
+                battingFirst: document.getElementById('setup-team-a').value 
+            });
+            location.reload();
+        };
+
+        document.getElementById('main-reset-btn').onclick = function() { if(confirm("ERASE ALL?")) { window.StorageManager.clearAll(); location.reload(); } };
+
+        document.querySelectorAll('.p-sync').forEach(s => {
+            s.onchange = function() { window.CricketEngine.setActivePlayers(document.getElementById('sel-striker').value, document.getElementById('sel-non-striker').value, document.getElementById('sel-bowler').value); };
+        });
+
+        window.onload = function() { refreshUI(); setInterval(refreshUI, 2000); };
+    </script>
+</body>
+</html>

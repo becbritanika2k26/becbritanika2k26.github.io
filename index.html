@@ -55,6 +55,12 @@
         </div>
 
         <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem;">
+            <div id="live-indicator-hero" style="display: none; width: 100%; justify-content: center; margin-bottom: 1rem;">
+                <a href="live-score.html" class="glass-panel" style="padding: 0.8rem 1.5rem; border-color: var(--accent); color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 10px; animation: pulse 2s infinite;">
+                   <span style="display: inline-block; width: 10px; height: 10px; background: red; border-radius: 50%;"></span>
+                   LIVE SCORE: <span id="hero-live-team">CRICKET MATCH</span>
+                </a>
+            </div>
             <a href="sports.html" class="btn btn-primary">Sports</a>
             <a href="cultural.html" class="btn btn-glass">Cultural</a>
             <a href="events.html" class="btn btn-glass">Other Events</a>
@@ -62,13 +68,30 @@
         </div>
     </header>
 
-    <div class="updates-ticker">
-        <div class="ticker-content" id="live-ticker">
-            Loading live updates...
+    <section class="container" style="margin-top: 4rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+            <div class="section-title" style="margin: 0;">Sports Broadcast Hub</div>
+            <div id="hub-live-status"></div>
         </div>
-    </div>
+        <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            <a href="live-score.html" class="card broadcast-card" style="text-decoration: none; position: relative; overflow: hidden; border-color: var(--accent);">
+                <div class="live-tag">LIVE NOW</div>
+                <i class="fas fa-satellite-dish" style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                <h3>View Live Scoreboard</h3>
+                <p>Experience the match with TV-style graphics, player stats, and real-time animations.</p>
+                <div class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Open Scoreboard</div>
+            </a>
+            
+            <div class="card broadcast-card" onclick="toggleDemoMode()" style="border-color: var(--accent-gold);">
+                <i class="fas fa-play-circle" style="font-size: 3rem; color: var(--accent-gold); margin-bottom: 1rem;"></i>
+                <h3>Try Demo Mode</h3>
+                <p>Instant live simulation. See the scorecard update automatically with animations.</p>
+                <div id="demo-btn-text" class="btn btn-glass" style="margin-top: 1rem; width: 100%; border-color: var(--accent-gold); color: var(--accent-gold);">Start Simulation</div>
+            </div>
+        </div>
+    </section>
 
-    <section class="container" style="display: grid; grid-template-columns: 1fr 350px; gap: 3rem; align-items: start;">
+    <section class="container" style="display: grid; grid-template-columns: 1fr 350px; gap: 3rem; align-items: start; margin-top: 4rem;">
         <div class="home-main">
             <div class="section-title" style="text-align: left; margin-left: 0;">Why Britanika?</div>
             <div class="card-grid" style="grid-template-columns: 1fr;">
@@ -129,13 +152,49 @@
         </div>
     </div>
 
+    <section class="container" style="margin-top: 4rem;">
+        <div class="section-title">CHAMPIONS SPOTLIGHT</div>
+        <div class="winner-carousel-section" id="winner-carousel-main">
+            <!-- Dynamic Carousel -->
+        </div>
+    </section>
+
+    <section class="container" style="margin-top: 4rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div class="section-title" style="margin: 0; text-align: left;">Winner's Wall</div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('all')">All</button>
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('Outdoor Sports')">Outdoor</button>
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('Indoor Events')">Indoor</button>
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('Cultural')">Cultural</button>
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('Technical')">Technical</button>
+            </div>
+        </div>
+        <div class="card-grid" id="winner-wall-grid">
+            <!-- Dynamic Winner Cards -->
+        </div>
+    </section>
+
     <footer style="padding: 3rem; text-align: center; border-top: 1px solid var(--glass-border);">
         <p>&copy; 2026 Bhubaneswar Engineering College. All Rights Reserved.</p>
         <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 10px;">Designed for Britanika 2K26</p>
     </footer>
 
-    <script src="js/fetchData.js"></script>
+    <!-- Scripts -->
+    <script src="js/eventManager.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/winnerManager.js"></script>
+    <script src="js/winnerRenderer.js"></script>
+    <script src="js/winnerPopup.js"></script>
+    <script src="js/winnerCarousel.js"></script>
+    <script src="js/winnerWall.js"></script>
     <script src="js/main.js"></script>
     <script src="js/spotlight.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.WinnerCarousel) window.WinnerCarousel.init('winner-carousel-main');
+            if (window.WinnerWall) window.WinnerWall.init('winner-wall-grid');
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WINNER HUB | BEC BRITANIKA 2K26</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <style>
+        :root {
+            --gold: #f59e0b;
+            --silver: #94a3b8;
+            --bronze: #b45309;
+            --primary: #38bdf8;
+        }
+        body { background: #020617; color: #fff; font-family: 'Outfit', sans-serif; }
+        .admin-header {
+            padding: 20px 40px; background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 100;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px; display: grid; grid-template-columns: 450px 1fr; gap: 40px; }
+        
+        .winner-form-card {
+            background: rgba(30, 41, 59, 0.3); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+            padding: 30px; position: sticky; top: 120px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--primary); font-weight: 800; margin-bottom: 10px; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; outline: none;
+        }
+        .form-group input:focus { border-color: var(--primary); }
+
+        .place-input-group { display: grid; grid-template-columns: 50px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .place-tag { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+        .p1 { background: var(--gold); color: #000; }
+        .p2 { background: var(--silver); color: #000; }
+        .p3 { background: var(--bronze); color: #fff; }
+
+        .event-table-container { background: rgba(30, 41, 59, 0.2); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 15px 20px; text-align: left; background: rgba(255,255,255,0.05); color: var(--primary); font-size: 0.75rem; text-transform: uppercase; }
+        td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+        .badge { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; }
+        .badge-success { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .btn-icon { width: 35px; height: 35px; border-radius: 6px; border: none; cursor: pointer; transition: 0.2s; margin-left: 5px; }
+        .edit { background: rgba(56, 189, 248, 0.1); color: var(--primary); }
+        .delete { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        @media (max-width: 1000px) {
+            .container { grid-template-columns: 1fr; }
+            .winner-form-card { position: static; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="admin-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <i class="fas fa-trophy" style="color: var(--gold); font-size: 2rem;"></i>
+            <h1 style="margin: 0; font-size: 1.5rem;">UNIVERSAL <span style="color: var(--primary);">WINNER HUB</span></h1>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="admin-events.html" class="btn-main" style="margin:0; background: rgba(255,255,255,0.1); text-decoration: none; padding: 10px 20px; border-radius: 8px; color: white;">EVENT ADMIN</a>
+            <a href="index.html" style="color: #fff; text-decoration: none; padding: 10px;">HOME</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Input Panel -->
+        <section>
+            <div class="winner-form-card">
+                <form id="winner-form">
+                    <input type="hidden" id="edit-id">
+                    
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="win-cat" onchange="window.adminWinnerController.onCategoryChange()" required></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Event Name</label>
+                        <select id="win-event" onchange="window.adminWinnerController.onEventChange()" required>
+                            <option value="">Select Category First</option>
+                        </select>
+                    </div>
+
+                    <div id="manual-event-wrap" class="form-group" style="display: none;">
+                        <label>Manual Event Name</label>
+                        <input type="text" id="manual-event-name" placeholder="Enter event name...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mode</label>
+                        <select id="win-mode">
+                            <option value="INDIVIDUAL">INDIVIDUAL MODE</option>
+                            <option value="TEAM">TEAM MODE</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 30px;">
+                        <label>Winner Standings</label>
+                        
+                        <div class="place-input-group">
+                            <div class="place-tag p1">1</div>
+                            <input type="text" id="pos-1" placeholder="Winner Name / Team Name" required>
+                        </div>
+                        
+                        <div class="place-input-group">
+                            <div class="place-tag p2">2</div>
+                            <input type="text" id="pos-2" placeholder="Runner Up">
+                        </div>
+                        
+                        <div class="place-input-group">
+                            <div class="place-tag p3">3</div>
+                            <input type="text" id="pos-3" placeholder="Third Place">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-main btn-start" style="width: 100%; margin: 30px 0 0 0; font-weight: 900;">BROADCAST WINNERS ▶</button>
+                    <button type="button" class="btn-main btn-reset" onclick="window.adminWinnerController.resetForm()" style="width: 100%; margin: 10px 0 0 0; font-size: 0.8rem;">CLEAN FORM</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- List Panel -->
+        <section>
+            <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <h2 style="margin: 0; color: var(--primary);">BROADCAST HISTORY</h2>
+            </div>
+            <div class="event-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Gold Winner</th>
+                            <th>Mode</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="winner-table-body">
+                        <!-- Winners row -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/winnerManager.js"></script>
+    <script src="js/adminWinnerController.js"></script>
+</body>
+</html>

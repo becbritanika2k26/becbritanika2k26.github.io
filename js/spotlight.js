@@ -1,53 +1,136 @@
-document.addEventListener('DOMContentLoaded', () => {
-    initSpotlight();
-});
+/**
+ * Spotlight System - BEC Britanika 2K26
+ * Handles "Today's Spotlight" popup logic and auto-expiry.
+ */
 
-function initSpotlight() {
-    const spotlightOverlay = document.getElementById('spotlight-overlay');
-    if (!spotlightOverlay) return;
+window.SpotlightManager = {
+    _key: 'bec_britanika_spotlight',
+    _expiryMs: 24 * 60 * 60 * 1000, // 24 Hours
 
-    // Default data as requested
-    const defaultEvents = [
-        { time: "09:00 AM", session: "Morning", events: ["Running Race (Boys/Girls)", "Long Jump (Boys/Girls)", "Shot Put (Boys/Girls)", "Discus Throw (Boys/Girls)"] },
-        { time: "02:00 PM", session: "Afternoon", events: ["Essay Writing (Boys/Girls)", "Painting Competition (Boys/Girls)"] }
-    ];
+    async init() {
+        this.cleanExpired();
+        this.render();
+        this.checkAutoTrigger();
+    },
 
-    const todayStr = "Feb 07, 2026";
-    document.getElementById('spotlight-date').innerText = todayStr;
-    document.querySelector('.spotlight-header h2').innerText = "TODAY'S SPOTLIGHT";
+    getData() {
+        const raw = localStorage.getItem(this._key);
+        if (!raw) return this.getDefaults();
 
-    // Load from localStorage if admin has added custom ones
-    const customSpotlight = JSON.parse(localStorage.getItem('bec_britanika_spotlight'));
-    const eventsToShow = customSpotlight || defaultEvents;
+        try {
+            const items = JSON.parse(raw);
+            // Ensure data is array
+            return Array.isArray(items) ? items : this.getDefaults();
+        } catch (e) {
+            return this.getDefaults();
+        }
+    },
 
-    const contentArea = document.getElementById('spotlight-content');
-    contentArea.innerHTML = eventsToShow.map(group => `
-        <div class="spotlight-group">
-            <div class="spotlight-session">${group.session} — ${group.time}</div>
-            <div class="spotlight-list">
-                ${group.events.map(e => `<div class="spotlight-item"><i class="fas fa-check-circle"></i> ${e}</div>`).join('')}
+    getDefaults() {
+        return [
+            { id: 'def-1', time: "09:00 AM", session: "Morning Session", events: ["Opening Ceremony", "Track Events Kickoff", "Registration Desk Open"], timestamp: Date.now() },
+            { id: 'def-2', time: "02:00 PM", session: "Afternoon Session", events: ["Fine Arts Gallery", "Seminar Hall A: Workshop"], timestamp: Date.now() }
+        ];
+    },
+
+    cleanExpired() {
+        let items = this.getData();
+        const now = Date.now();
+        // Filter out items older than 24 hours
+        const filtered = items.filter(item => {
+            if (!item.timestamp) return true; // Keep old items without timestamp for safety or fix them
+            return (now - item.timestamp) < this._expiryMs;
+        });
+
+        if (filtered.length !== items.length) {
+            localStorage.setItem(this._key, JSON.stringify(filtered));
+        }
+    },
+
+    save(items) {
+        localStorage.setItem(this._key, JSON.stringify(items));
+        this.render();
+    },
+
+    add(session, time, eventList) {
+        const items = this.getData();
+        items.push({
+            id: 'spot-' + Date.now(),
+            session: session,
+            time: time,
+            events: Array.isArray(eventList) ? eventList : eventList.split(',').map(e => e.trim()),
+            timestamp: Date.now()
+        });
+        this.save(items);
+    },
+
+    delete(id) {
+        let items = this.getData();
+        items = items.filter(it => it.id !== id);
+        this.save(items);
+    },
+
+    update(id, data) {
+        let items = this.getData();
+        const index = items.findIndex(it => it.id === id);
+        if (index !== -1) {
+            items[index] = { ...items[index], ...data };
+            this.save(items);
+        }
+    },
+
+    render() {
+        const container = document.getElementById('spotlight-content');
+        if (!container) return;
+
+        const items = this.getData();
+        if (items.length === 0) {
+            container.innerHTML = `<p style="text-align:center; opacity:0.6;">No special highlights for today.</p>`;
+            return;
+        }
+
+        container.innerHTML = items.map(item => `
+            <div class="spotlight-group">
+                <div class="spotlight-session">
+                    <i class="far fa-clock"></i> ${item.time} — <span>${item.session}</span>
+                </div>
+                <div class="spotlight-list">
+                    ${(item.events || []).map(evt => `
+                        <div class="spotlight-item">
+                            <i class="fas fa-arrow-right"></i>
+                            <span>${evt}</span>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
+    },
 
-    // For testing/initial phase, show on every visit if not seen in last 5 mins
-    const lastSeen = localStorage.getItem('spotlight_last_seen');
-    const now = Date.now();
-    if (!lastSeen || (now - lastSeen > 300000)) { // 5 minutes instead of 1 hour
-        setTimeout(() => {
-            if (spotlightOverlay.style.display !== 'flex') {
-                spotlightOverlay.style.display = 'flex';
+    checkAutoTrigger() {
+        const overlay = document.getElementById('spotlight-overlay');
+        if (!overlay) return;
+
+        const lastSeen = localStorage.getItem('spotlight_last_seen');
+        const now = Date.now();
+        // Show if not seen in last 10 minutes (for better UX during fest)
+        if (!lastSeen || (now - lastSeen > 600000)) {
+            setTimeout(() => {
+                overlay.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
-            }
-        }, 1200);
+            }, 1500);
+        }
     }
-}
+};
 
 function closeSpotlight() {
-    document.getElementById('spotlight-overlay').style.display = 'none';
+    const overlay = document.getElementById('spotlight-overlay');
+    if (overlay) overlay.style.display = 'none';
     document.body.style.overflow = 'auto';
     localStorage.setItem('spotlight_last_seen', Date.now());
 }
 
 window.closeSpotlight = closeSpotlight;
-window.initSpotlight = initSpotlight;
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.SpotlightManager.init();
+});
