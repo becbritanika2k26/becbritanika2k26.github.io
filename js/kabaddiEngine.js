@@ -6,6 +6,7 @@ import RealtimeSync from './realtimeSync.js';
 window.KabaddiEngine = {
     state: null,
     _unsubscribe: null,
+    history: [], // Local stack for undo
 
     getInitialState() {
         return {
@@ -49,11 +50,17 @@ window.KabaddiEngine = {
         const newState = this.getInitialState();
         newState.matchInfo.teamA.name = config.teamA || 'Team A';
         newState.matchInfo.teamB.name = config.teamB || 'Team B';
+        this.history = [];
         await this.sync(newState);
     },
 
     async addPoints(teamKey, type, points = 1) {
-        if (!this.state || this.state.matchInfo.status !== 'LIVE') return;
+        if (!this.state || (this.state.matchInfo.status !== 'LIVE' && this.state.matchInfo.status !== 'HALF_TIME')) return;
+
+        // Save history for undo
+        this.history.push(JSON.parse(JSON.stringify(this.state)));
+        if (this.history.length > 20) this.history.shift();
+
         const newState = JSON.parse(JSON.stringify(this.state));
         const team = newState.matchInfo[teamKey === 'A' ? 'teamA' : 'teamB'];
 
@@ -79,15 +86,47 @@ window.KabaddiEngine = {
     },
 
     async updateStatus(status) {
+        this.history.push(JSON.parse(JSON.stringify(this.state)));
         const newState = JSON.parse(JSON.stringify(this.state));
         newState.matchInfo.status = status;
+        if (status === 'COMPLETED') {
+            await this.saveMatchToHistory(newState);
+        }
         await this.sync(newState);
     },
 
+    async saveMatchToHistory(state) {
+        try {
+            const winner = state.matchInfo.teamA.score > state.matchInfo.teamB.score ? state.matchInfo.teamA.name : state.matchInfo.teamB.name;
+            const historyData = {
+                teamA: state.matchInfo.teamA.name,
+                teamB: state.matchInfo.teamB.name,
+                scoreA: state.matchInfo.teamA.score,
+                scoreB: state.matchInfo.teamB.score,
+                winner: winner,
+                timestamp: Date.now()
+            };
+            await RealtimeSync.addToCollection('kabaddiHistory', historyData);
+            console.log("Kabaddi history saved!");
+        } catch (e) {
+            console.error(e);
+        }
+    },
+
     async setHalf(half) {
+        this.history.push(JSON.parse(JSON.stringify(this.state)));
         const newState = JSON.parse(JSON.stringify(this.state));
         newState.matchInfo.half = half;
         await this.sync(newState);
+    },
+
+    async undo() {
+        if (this.history.length > 0) {
+            const lastState = this.history.pop();
+            await this.sync(lastState);
+        } else {
+            alert("No more undos available!");
+        }
     },
 
     async sync(state) {

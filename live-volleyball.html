@@ -70,6 +70,24 @@
             color: var(--accent-gold);
             text-transform: uppercase;
         }
+
+        @media (max-width: 768px) {
+            .main-score-card { 
+                grid-template-columns: 1fr; 
+                padding: 30px 15px; 
+                gap: 20px;
+            }
+            .team-vb h2 { 
+                font-size: clamp(1.2rem, 8vw, 2.2rem); 
+                word-wrap: break-word;
+            }
+            .current-pts { font-size: clamp(4rem, 20vw, 6rem); margin: 10px 0; }
+            .set-history-tray { flex-wrap: wrap; gap: 10px; }
+            .set-box { padding: 8px 12px; flex: 1 1 100px; }
+            .vb-container { padding: 10px; margin: 10px auto; }
+            .match-info-bar { font-size: 0.8rem; margin-bottom: 10px; }
+            .main-score-card > div:nth-child(2) { grid-row: 2; margin: 10px 0; opacity: 0.6; } /* The VS text */
+        }
     </style>
 </head>
 <body>
@@ -104,10 +122,21 @@
             <div class="event-text" id="event-main-text">POINT!</div>
             <div class="event-subtext" id="event-sub-text">GREAT PLAY</div>
         </div>
+    <div class="winner-sidebar">
+        <div class="sidebar-title">
+            <i class="fas fa-history"></i> PREVIOUS MATCHES
+        </div>
+        <div id="side-history-list">
+            <!-- Data from HistoryRenderer -->
+        </div>
     </div>
 
     <script type="module">
         import './js/volleyballEngine.js';
+        import './js/historyRenderer.js';
+
+        // Sidebar Init
+        window.HistoryRenderer.init('side-history-list', 'volleyball');
 
         let lastSeenEvent = null;
 

@@ -258,6 +258,19 @@
                     <label>Participants List (One per line)</label>
                     <textarea id="edit-participants" rows="5"></textarea>
                 </div>
+                <div class="form-group">
+                    <label>PDF Link (Schedule/Rules URL)</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                        <input type="text" id="edit-pdf" placeholder="https://..." style="flex: 1;">
+                        <label for="pdf-upload" class="btn btn-glass" style="margin:0; padding: 10px; cursor: pointer;">
+                            <i class="fas fa-upload"></i>
+                        </label>
+                        <input type="file" id="pdf-upload" accept="application/pdf" style="display: none;">
+                    </div>
+                    <small id="pdf-status" style="color: #94a3b8; font-size: 0.7rem; display: block;">
+                        * Paste a cloud link or <strong>upload direct</strong> from your computer.
+                    </small>
+                </div>
                 <div style="display: flex; gap: 15px; margin-top: 30px;">
                     <button type="submit" class="btn-main btn-start" style="flex: 2; margin: 0;">Save Changes</button>
                     <button type="button" class="btn-main btn-reset" onclick="closeModal()" style="flex: 1; margin: 0;">Cancel</button>

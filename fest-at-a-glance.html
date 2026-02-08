@@ -58,6 +58,16 @@
         .status-COMPLETED { background: rgba(148, 163, 184, 0.1); color: var(--done); border: 1px solid var(--done); opacity: 0.7; }
 
         .venue-tag { font-size: 0.75rem; color: var(--primary); opacity: 0.8; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            .dashboard-header h1 { font-size: 2.2rem !important; }
+            .stats-row { grid-template-columns: 1fr 1fr; margin-top: -30px; }
+            .stat-card { padding: 15px; }
+            .stat-card .val { font-size: 1.8rem; }
+            th, td { padding: 12px 10px; font-size: 0.8rem; }
+            .minimal-table-container { overflow-x: auto; border-radius: 12px; }
+            table { min-width: 600px; }
+        }
     </style>
 </head>
 <body>

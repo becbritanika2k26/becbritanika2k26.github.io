@@ -8,6 +8,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -18,7 +19,7 @@ const firebaseConfig = {
     messagingSenderId: "326940331877",
     appId: "1:326940331877:web:65d7b57ac82b9bc7dc5b8c",
     measurementId: "G-0T3J6DXLQH",
-    databaseURL: "https://britanika-fest-default-rtdb.firebaseio.com"
+    databaseURL: "https://britanika-fest-default-rtdb.firebaseio.com/" // Added trailing slash to fix warning
 };
 
 // Initialize Firebase
@@ -62,4 +63,6 @@ try {
     }, 3000);
 }
 
-export { app, db, auth, rtdb };
+const storage = getStorage(app);
+
+export { app, db, auth, rtdb, storage };

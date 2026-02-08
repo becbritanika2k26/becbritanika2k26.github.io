@@ -224,9 +224,11 @@ window.openEventDetail = (id) => {
 
     content.innerHTML = `
         <span class="modal-close" onclick="closeEventModal()">&times;</span>
+        ${event.image ? `
         <div class="modal-header-img">
-            <img src="${event.image || 'assets/logo.png'}" onerror="this.src='assets/logo.png'" style="width: 100%; height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 20px;">
+            <img src="${event.image}" onerror="this.parentElement.style.display='none'" style="width: 100%; height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 20px;">
         </div>
+        ` : ''}
         <h2 style="color: var(--primary); margin-bottom: 5px;">${event.name}</h2>
         <div style="display: flex; gap: 15px; font-size: 0.9rem; margin-bottom: 20px; color: var(--text-dim);">
             <span><i class="far fa-calendar-alt"></i> ${event.date || 'TBA'}</span>
@@ -244,8 +246,11 @@ window.openEventDetail = (id) => {
                 </ul>
             ` : ''}
 
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                 <button class="btn btn-primary" onclick="window.print()">Download Schedule</button>
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+                 ${event.pdfUrl ?
+            `<a href="${event.pdfUrl}" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; justify-content: center; width: 100%;"><i class="fas fa-file-download"></i> Download Details</a>` :
+            `<p style="font-size: 0.8rem; opacity: 0.5;">No additional documents available.</p>`
+        }
             </div>
         </div>
     `;

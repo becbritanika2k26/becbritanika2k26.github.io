@@ -26,6 +26,7 @@
             <li><a href="events.html">Other Events</a></li>
             <li><a href="schedule.html">Schedule</a></li>
             <li><a href="updates.html">Live Updates</a></li>
+            <li><a href="winners-wall.html" style="color: var(--accent);"><i class="fas fa-trophy"></i> Winners</a></li>
         </ul>
         <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
     </nav>
@@ -180,19 +181,13 @@
     </section>
 
     <section class="container" style="margin-top: 4rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-            <div class="section-title" style="margin: 0; text-align: left;">Winner's Wall</div>
-            <div class="filter-scroll">
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('all')">All</button>
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('Outdoor Sports')">Outdoor</button>
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('Indoor Events')">Indoor</button>
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('Cultural')">Cultural</button>
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('Technical')">Technical</button>
-            </div>
-
-        </div>
-        <div class="card-grid" id="winner-wall-grid">
-            <!-- Dynamic Winner Cards -->
+        <div class="card-grid">
+            <a href="winners-wall.html" class="card broadcast-card" style="text-decoration: none; border-color: var(--accent-gold); padding: 40px; text-align: center; background: linear-gradient(135deg, rgba(30, 41, 59, 0.4), rgba(245, 158, 11, 0.05));">
+                <div style="font-size: 3.5rem; color: var(--accent-gold); margin-bottom: 20px;">🏆</div>
+                <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">The Winners Wall</h3>
+                <p style="font-size: 1.1rem; opacity: 0.7;">Explore the full gallery of Britanika 2K26 Champions and Hall of Fame.</p>
+                <div class="btn btn-primary" style="margin-top: 20px; display: inline-block;">View All Winners</div>
+            </a>
         </div>
     </section>
 

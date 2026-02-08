@@ -6,8 +6,8 @@ window.Renderer = {
     renderEventCard(event) {
         return `
             <div class="card event-card" data-category="${event.category}" id="card-${event.id}">
-                <div class="card-image">
-                    <img src="${event.image}" alt="${event.name}" onerror="this.src='assets/default-event.png'">
+                <div class="card-image" style="${!event.image ? 'background: linear-gradient(135deg, #1e293b, #0f172a);' : ''}">
+                    ${event.image ? `<img src="${event.image}" alt="${event.name}" onerror="this.style.display='none'">` : ''}
                     <div class="category-tag">${event.category}</div>
                 </div>
                 <div class="card-content">
@@ -17,9 +17,16 @@ window.Renderer = {
                         <span><i class="far fa-clock"></i> ${event.time}</span>
                     </div>
                     <p><i class="fas fa-map-marker-alt"></i> ${event.venue}</p>
-                    <button class="btn btn-primary" onclick="openEventDetail('${event.id}')" style="width: 100%; margin-top: 1rem;">
-                        View Details
-                    </button>
+                    <div style="display: flex; gap: 8px; margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="openEventDetail('${event.id}')" style="flex: 1; padding: 0.8rem 5px; font-size: 0.75rem;">
+                            View Details
+                        </button>
+                        ${event.pdfUrl ? `
+                            <a href="${event.pdfUrl}" target="_blank" class="btn btn-glass" style="flex: 1; padding: 0.8rem 5px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; border-color: #ef4444; color: #ef4444;">
+                                <i class="fas fa-file-pdf"></i> Rules
+                            </a>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
         `;

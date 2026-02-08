@@ -8,11 +8,20 @@ window.SpotlightManager = {
     _data: [],
 
     async init() {
-        // Initial render will be called by EventEngine listener in index.html
+        this.updateDateDisplay();
         this.checkAutoTrigger();
     },
 
+    updateDateDisplay() {
+        const dateEl = document.getElementById('spotlight-date');
+        if (dateEl) {
+            const options = { month: 'short', day: '2-digit', year: 'numeric' };
+            dateEl.innerText = new Date().toLocaleDateString('en-US', options);
+        }
+    },
+
     render(items) {
+        const hasChanged = JSON.stringify(this._data) !== JSON.stringify(items);
         this._data = items || [];
         const container = document.getElementById('spotlight-content');
         const homepageList = document.getElementById('homepage-live-updates');
@@ -43,7 +52,6 @@ window.SpotlightManager = {
             if (this._data.length === 0) {
                 homepageList.innerHTML = '<p style="opacity:0.6; font-size:0.8rem;">Awaiting campus updates...</p>';
             } else {
-                // Show latest few as small buzz items
                 homepageList.innerHTML = this._data.slice(0, 3).map(it => `
                     <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
                         <div style="font-size: 0.7rem; color: var(--primary); font-weight: bold;">${it.time}</div>
@@ -53,20 +61,28 @@ window.SpotlightManager = {
                 `).join('');
             }
         }
+
+        // Auto-show if content changed and not seen recently
+        if (hasChanged && this._data.length > 0) {
+            this.show();
+        }
+    },
+
+    show() {
+        const overlay = document.getElementById('spotlight-overlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            localStorage.setItem('spotlight_last_seen', Date.now());
+        }
     },
 
     checkAutoTrigger() {
-        const overlay = document.getElementById('spotlight-overlay');
-        if (!overlay) return;
-
         const lastSeen = localStorage.getItem('spotlight_last_seen');
         const now = Date.now();
-        // Show if not seen in last 10 minutes
-        if (!lastSeen || (now - lastSeen > 600000)) {
-            setTimeout(() => {
-                overlay.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }, 1500);
+        // Show automatically if not seen in last 30 minutes on page load
+        if (!lastSeen || (now - lastSeen > 1800000)) {
+            setTimeout(() => this.show(), 1000);
         }
     }
 };

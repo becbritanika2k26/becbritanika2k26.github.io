@@ -21,13 +21,14 @@ window.WinnerPopup = {
     },
 
     trigger(w) {
-        if (!w || this._lastId === w.id) return;
+        if (!w) return;
 
-        // Prevent multiple popups for same winner in same session
-        if (sessionStorage.getItem('shown_' + w.id)) return;
+        // Use a unique key based on ID and timestamp to allow re-triggering if admin re-publishes
+        const triggerKey = `shown_${w.id}_${w.timestamp}`;
+        if (sessionStorage.getItem(triggerKey)) return;
 
+        sessionStorage.setItem(triggerKey, 'true');
         this._lastId = w.id;
-        sessionStorage.setItem('shown_' + w.id, 'true');
 
         const content = document.getElementById('popup-content');
         if (!content) return;

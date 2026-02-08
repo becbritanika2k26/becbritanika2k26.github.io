@@ -17,6 +17,37 @@
         .kb-btn:hover { background: var(--accent-blue); color: #000; }
         .allout-btn { grid-column: span 2; background: var(--accent-gold); color: #000; }
         .timeline-item { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; display: flex; justify-content: space-between; }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .admin-layout {
+                grid-template-columns: 1fr !important;
+                padding: 10px;
+            }
+            .scoring-grid {
+                grid-template-columns: 1fr;
+            }
+            .score-val {
+                font-size: 3rem;
+            }
+            .admin-header {
+                padding: 10px 20px !important;
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .admin-header h1 {
+                font-size: 0.9rem !important;
+            }
+            .admin-header div {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .btn-main {
+                padding: 10px 15px !important;
+                font-size: 0.7rem !important;
+            }
+        }
     </style>
 </head>
 <body class="admin-theme">
@@ -32,6 +63,7 @@
         </div>
         <div style="display: flex; gap: 10px;">
             <a href="live-kabaddi.html" target="_blank" class="btn-main" style="margin: 0; background: var(--accent-blue); color: #000; font-size: 0.7rem; padding: 8px 15px;">📺 TV VIEW</a>
+            <a href="admin-history-manager.html" class="btn-main" style="margin: 0; background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.7rem; padding: 8px 15px;">📊 MANAGE HISTORY</a>
             <a href="admin.html" class="btn-main" style="margin: 0; background: rgba(255,255,255,0.1); color: #fff; font-size: 0.7rem; padding: 8px 15px;">BACK</a>
         </div>
     </header>
@@ -60,6 +92,9 @@
                     <option value="1">1ST HALF</option>
                     <option value="2">2ND HALF</option>
                 </select>
+
+                <button onclick="undo()" class="btn-main" style="margin-top: 20px; background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue);">⏪ UNDO LAST ACTION</button>
+                <button onclick="hardReset()" class="btn-main btn-reset" style="margin-top: 10px;">🗑 HARD RESET SYSTEM</button>
             </div>
         </aside>
 
@@ -145,6 +180,8 @@
         window.addPts = (team, type, pts) => window.KabaddiEngine.addPoints(team, type, pts);
         window.updateStatus = () => window.KabaddiEngine.updateStatus(document.getElementById('match-status-sel').value);
         window.updateHalf = () => window.KabaddiEngine.setHalf(document.getElementById('match-half-sel').value);
+        window.undo = () => window.KabaddiEngine.undo();
+        window.hardReset = () => { if(confirm("Bhai, pura Kabaddi match reset kardu?")) window.KabaddiEngine.initMatch({}); };
     </script>
 </body>
 </html>

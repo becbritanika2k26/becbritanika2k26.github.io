@@ -70,6 +70,7 @@ window.VolleyballEngine = {
             if (newState.matchInfo[winnerKey === 'A' ? 'teamA' : 'teamB'].setsWon > newState.matchInfo.totalSets / 2) {
                 newState.matchInfo.status = 'COMPLETED';
                 newState.lastEvent = `MATCH_WON_${winnerKey}`;
+                await this.saveMatchToHistory(newState);
             } else {
                 newState.matchInfo.currentSetNumber++;
                 newState.currentSet.teamA = 0;
@@ -79,6 +80,24 @@ window.VolleyballEngine = {
         }
 
         await this.sync(newState);
+    },
+
+    async saveMatchToHistory(state) {
+        try {
+            const winner = state.matchInfo.teamA.setsWon > state.matchInfo.teamB.setsWon ? state.matchInfo.teamA.name : state.matchInfo.teamB.name;
+            const historyData = {
+                teamA: state.matchInfo.teamA.name,
+                teamB: state.matchInfo.teamB.name,
+                scoreA: state.matchInfo.teamA.setsWon,
+                scoreB: state.matchInfo.teamB.setsWon,
+                winner: winner,
+                timestamp: Date.now()
+            };
+            await RealtimeSync.addToCollection('volleyballHistory', historyData);
+            console.log("Volleyball history saved!");
+        } catch (e) {
+            console.error(e);
+        }
     },
 
     async undo() {

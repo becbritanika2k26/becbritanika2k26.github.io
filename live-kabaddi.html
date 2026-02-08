@@ -30,6 +30,30 @@
         .timeline-title { font-size: 0.8rem; color: var(--accent-gold); font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
         .timeline-list { display: flex; flex-direction: column; gap: 10px; }
         .tl-item { display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 8px; font-size: 0.9rem; }
+
+        @media (max-width: 768px) {
+            .kb-live-container { padding: 10px; margin: 20px auto; }
+            .score-panel-kb { 
+                grid-template-columns: 1fr; 
+                padding: 30px 15px;
+                gap: 20px;
+            }
+            .team-kb h2 { 
+                font-size: clamp(1.2rem, 8vw, 2.5rem); 
+                word-wrap: break-word;
+            }
+            .kb-points { font-size: clamp(4rem, 20vw, 7rem); }
+            .vs-kb { 
+                margin: 0 auto;
+                width: 50px; height: 50px; font-size: 1.2rem;
+                grid-row: 2; /* Place VS between teams */
+            }
+            .team-kb:first-child { grid-row: 1; }
+            .team-kb:last-child { grid-row: 3; text-align: center !important; }
+            .score-panel-kb::before { font-size: 3rem; top: 5px; opacity: 0.05; }
+            .kb-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .tl-item { font-size: 0.8rem; }
+        }
     </style>
 </head>
 <body>
@@ -77,10 +101,21 @@
             <div class="event-text" id="event-main-text">ALL OUT!</div>
             <div class="event-subtext" id="event-sub-text">INCREDIBLE TACKLE</div>
         </div>
+    <div class="winner-sidebar">
+        <div class="sidebar-title">
+            <i class="fas fa-history"></i> PREVIOUS MATCHES
+        </div>
+        <div id="side-history-list">
+            <!-- Data from HistoryRenderer -->
+        </div>
     </div>
 
     <script type="module">
         import './js/kabaddiEngine.js';
+        import './js/historyRenderer.js';
+
+        // Sidebar Init
+        window.HistoryRenderer.init('side-history-list', 'kabaddi');
 
         let lastSeenEvent = null;
 

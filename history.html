@@ -53,6 +53,21 @@
             background: var(--accent-blue);
         }
         .match-card.tie::before { background: #94a3b8; }
+        .btn-delete {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            z-index: 10;
+            display: none; /* Viewable only for Admins */
+        }
+        .btn-delete:hover { background: #ef4444; color: #fff; }
         .match-header {
             display: flex;
             justify-content: space-between;
@@ -60,6 +75,7 @@
             color: #94a3b8;
             margin-bottom: 15px;
             font-weight: bold;
+            padding-right: 40px; /* Space for delete button */
         }
         .teams-row {
             display: flex;
@@ -114,6 +130,14 @@
             padding: 100px 0;
             opacity: 0.5;
         }
+        @media (max-width: 600px) {
+            .header { flex-direction: column; gap: 20px; align-items: flex-start; }
+            .team-name { font-size: 1rem; }
+            .team-score { font-size: 1.2rem; }
+            .match-card { padding: 15px; }
+            .vs { font-size: 0.8rem; }
+            .btn-delete { top: 10px; right: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -140,8 +164,8 @@
         async function loadHistory() {
             const list = document.getElementById('history-list');
             try {
-                const history = await RealtimeSync.subscribeCollection('cricketHistory', (data) => {
-                    if (data.length === 0) {
+                RealtimeSync.subscribeCollection('cricketHistory', (data) => {
+                    if (!data || data.length === 0) {
                         list.innerHTML = '<div class="no-data"><p>No match history available yet.</p></div>';
                         return;
                     }

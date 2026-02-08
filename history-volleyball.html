@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLLEYBALL HISTORY | BRITANIKA 2K26</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <style>
+        body { background: #020617; font-family: 'Outfit', sans-serif; color: #fff; padding: 40px 20px; }
+        .history-container { max-width: 900px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        .match-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 25px; margin-bottom: 20px; position: relative; }
+        .match-card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background: var(--accent-gold); }
+        .btn-delete { position: absolute; top:15px; right:15px; background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.7rem; display:none; }
+        .btn-delete:hover { background:#ef4444; color:#fff; }
+        .teams-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .team-name { font-size: 1.2rem; font-weight: 900; }
+        .team-score { font-size: 2rem; font-weight: 900; color: var(--accent-gold); }
+        .result-bar { background: rgba(245, 158, 11, 0.1); color: var(--accent-gold); padding: 10px; border-radius: 8px; font-weight: 900; text-align: center; font-size: 0.9rem; text-transform: uppercase; }
+        .btn-back { text-decoration: none; color: #fff; background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; }
+        .no-data { text-align: center; padding: 100px 0; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="history-container">
+        <div class="header">
+            <div>
+                <h1 style="margin:0; font-size: 1.8rem; font-weight: 900;">VOLLEYBALL <span style="color: var(--accent-gold);">HISTORY</span></h1>
+                <p style="margin: 5px 0 0; font-size: 0.8rem; opacity: 0.6;">Past volleyball matches</p>
+            </div>
+            <a href="admin-volleyball.html" class="btn-back"><i class="fas fa-chevron-left"></i> BACK</a>
+        </div>
+        <div id="history-list">
+            <div class="no-data"><p>Loading records...</p></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import RealtimeSync from './js/realtimeSync.js';
+
+        async function loadHistory() {
+            const list = document.getElementById('history-list');
+            RealtimeSync.subscribeCollection('volleyballHistory', (data) => {
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<div class="no-data"><p>No history yet.</p></div>';
+                    return;
+                }
+                data.sort((a,b) => b.timestamp - a.timestamp);
+                list.innerHTML = data.map(m => `
+                    <div class="match-card">
+                        <div class="teams-row">
+                            <div class="team"><div class="team-name">${m.teamA}</div><div class="team-score">${m.scoreA}</div></div>
+                            <div style="font-size: 1rem; opacity: 0.3;">VS</div>
+                            <div class="team" style="text-align:right;"><div class="team-name">${m.teamB}</div><div class="team-score">${m.scoreB}</div></div>
+                        </div>
+                        <div class="result-bar">${m.winner} WON THE MATCH</div>
+                        <div style="text-align:center; font-size:0.7rem; opacity:0.5; margin-top:10px;">${new Date(m.timestamp).toLocaleString()}</div>
+                    </div>
+                `).join('');
+            });
+        }
+        loadHistory();
+    </script>
+</body>
+</html>

@@ -42,8 +42,8 @@ window.WinnerEngine = {
         if (data.length > 0) {
             const latest = data[0];
             const now = Date.now();
-            // If winner was added in the last 10 seconds, trigger popup
-            if (now - latest.timestamp < 10000) {
+            // Trigger if winner was added in the last 15 minutes
+            if (now - latest.timestamp < 900000) {
                 if (window.WinnerPopup) window.WinnerPopup.trigger(latest);
             }
         }

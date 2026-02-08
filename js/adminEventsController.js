@@ -3,6 +3,8 @@
  */
 
 import './eventEngine.js';
+import { storage } from './cloudConfig.js';
+import { ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 window.adminEventsController = {
     init() {
@@ -28,6 +30,72 @@ window.adminEventsController = {
                 e.preventDefault();
                 this.handleSaveSpotlight();
             };
+        }
+
+        const pdfUpload = document.getElementById('pdf-upload');
+        if (pdfUpload) {
+            pdfUpload.onchange = (e) => this.handlePdfUpload(e);
+        }
+    },
+
+    async handlePdfUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Check file size (limit to 10MB for safety/speed)
+        if (file.size > 10 * 1024 * 1024) {
+            alert("Bhai, file bohot badi h (10MB se zyada). Choti file use karo ya link paste kardo.");
+            return;
+        }
+
+        const status = document.getElementById('pdf-status');
+        const pdfInput = document.getElementById('edit-pdf');
+
+        try {
+            status.style.color = "#f59e0b";
+            status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting to Cloud...';
+
+            const storageRef = ref(storage, `event_pdfs/${Date.now()}_${file.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    status.innerHTML = `<i class="fas fa-upload fa-bounce"></i> Uploading: ${Math.round(progress)}%`;
+
+                    if (progress === 0) {
+                        status.innerHTML += ' <br><small style="font-size:0.6rem;">(Starting... Please wait)</small>';
+                    }
+                },
+                (error) => {
+                    console.error("Upload failed", error);
+                    if (error.code === 'storage/unauthorized' || error.message.includes('CORS')) {
+                        status.innerHTML = '<i class="fas fa-key"></i> <strong>BLOCK BY SECURITY (CORS):</strong> Please paste the link manually or fix Storage permissions in Firebase Console.';
+                    } else {
+                        status.innerHTML = '<i class="fas fa-exclamation-circle"></i> Upload Failed. Use direct link.';
+                    }
+                    status.style.color = "#ef4444";
+                },
+                async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    pdfInput.value = downloadURL;
+                    status.innerHTML = '<i class="fas fa-check-circle"></i> Upload Success! URL Updated.';
+                    status.style.color = "#22c55e";
+                }
+            );
+
+            // Timeout check for CORS/Network Hang
+            setTimeout(() => {
+                const currentStatus = status.innerText;
+                if (currentStatus.includes('0%') || currentStatus.includes('Connecting')) {
+                    status.innerHTML = '<i class="fas fa-shield-alt"></i> <strong>Security Hang Detected!</strong><br>Chrome is blocking the upload. Please paste the direct G-Drive/Cloud link in the box below as a fix.';
+                    status.style.color = "#fca5a5";
+                }
+            }, 8000); // 8 seconds timeout
+
+        } catch (err) {
+            console.error("Setup failed", err);
+            status.innerHTML = 'Error initializing upload.';
         }
     },
 
@@ -65,7 +133,8 @@ window.adminEventsController = {
             date: document.getElementById('edit-date').value,
             time: document.getElementById('edit-time').value,
             status: document.getElementById('edit-status').value || 'UPCOMING',
-            participants: document.getElementById('edit-participants').value.split('\n').filter(p => p.trim())
+            participants: document.getElementById('edit-participants').value.split('\n').filter(p => p.trim()),
+            pdfUrl: document.getElementById('edit-pdf').value
         };
 
         try {
@@ -141,6 +210,7 @@ window.adminEventsController = {
         document.getElementById('edit-time').value = event.time || '';
         document.getElementById('edit-status').value = event.status || 'UPCOMING';
         document.getElementById('edit-participants').value = (event.participants || []).join('\n');
+        document.getElementById('edit-pdf').value = event.pdfUrl || '';
         document.getElementById('event-modal').style.display = 'flex';
     },
 
