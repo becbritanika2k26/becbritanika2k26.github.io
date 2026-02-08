@@ -124,6 +124,18 @@ window.adminEventsController = {
         }
     },
 
+    ensureDirectDownloadLink(url) {
+        if (!url || !url.includes('drive.google.com')) return url;
+
+        // Extract File ID from different G-Drive URL formats
+        const match = url.match(/\/d\/([^/]+)/) || url.match(/id=([^&]+)/);
+        if (match && match[1]) {
+            // Return direct download format
+            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+        }
+        return url;
+    },
+
     async handleSave() {
         const id = document.getElementById('edit-id').value;
         const data = {
@@ -134,7 +146,7 @@ window.adminEventsController = {
             time: document.getElementById('edit-time').value,
             status: document.getElementById('edit-status').value || 'UPCOMING',
             participants: document.getElementById('edit-participants').value.split('\n').filter(p => p.trim()),
-            pdfUrl: document.getElementById('edit-pdf').value
+            pdfUrl: this.ensureDirectDownloadLink(document.getElementById('edit-pdf').value)
         };
 
         try {

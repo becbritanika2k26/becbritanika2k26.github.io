@@ -22,7 +22,8 @@ window.Renderer = {
                             View Details
                         </button>
                         ${event.pdfUrl ? `
-                            <a href="${event.pdfUrl}" target="_blank" class="btn btn-glass" style="flex: 1; padding: 0.8rem 5px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; border-color: #ef4444; color: #ef4444;">
+                            <a href="${event.pdfUrl.includes('drive.google.com') ? event.pdfUrl.replace(/\/file\/d\/([^/]+)\/view.*/, '/uc?export=download&id=$1') : event.pdfUrl}" 
+                               target="_blank" class="btn btn-glass" style="flex: 1; padding: 0.8rem 5px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; border-color: #ef4444; color: #ef4444;">
                                 <i class="fas fa-file-pdf"></i> Rules
                             </a>
                         ` : ''}

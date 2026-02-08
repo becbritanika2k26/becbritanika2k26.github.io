@@ -248,7 +248,7 @@ window.openEventDetail = (id) => {
 
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
                  ${event.pdfUrl ?
-            `<a href="${event.pdfUrl}" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; justify-content: center; width: 100%;"><i class="fas fa-file-download"></i> Download Details</a>` :
+            `<a href="${event.pdfUrl.includes('drive.google.com') ? event.pdfUrl.replace(/\/file\/d\/([^/]+)\/view.*/, '/uc?export=download&id=$1') : event.pdfUrl}" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; justify-content: center; width: 100%;"><i class="fas fa-file-download"></i> Download Details</a>` :
             `<p style="font-size: 0.8rem; opacity: 0.5;">No additional documents available.</p>`
         }
             </div>
