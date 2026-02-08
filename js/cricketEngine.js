@@ -128,21 +128,83 @@ window.CricketEngine = {
         }
 
         const maxBalls = newState.matchInfo.totalOvers * 6;
+
+        // Calculate Statistics
+        const currentBalls = team.balls;
+        const currentRuns = team.score;
+        newState.stats = {
+            crr: currentBalls > 0 ? ((currentRuns / currentBalls) * 6).toFixed(2) : "0.00",
+            ballsLeft: maxBalls - currentBalls,
+            runsNeeded: newState.matchInfo.target ? newState.matchInfo.target - currentRuns : null,
+        };
+
+        if (newState.matchInfo.target) {
+            const ballsLeft = newState.stats.ballsLeft;
+            newState.stats.rrr = ballsLeft > 0 ? ((newState.stats.runsNeeded / ballsLeft) * 6).toFixed(2) : "∞";
+        }
+
         if (newState.matchInfo.currentInnings === 2 && team.score >= newState.matchInfo.target) {
-            newState.matchInfo.status = 'COMPLETED';
-            newState.matchInfo.lastEvent = 'WIN';
+            if (this.state.matchInfo.status !== 'COMPLETED') {
+                newState.matchInfo.status = 'COMPLETED';
+                newState.matchInfo.lastEvent = 'WIN';
+                await this.saveMatchToHistory(newState);
+            } else {
+                newState.matchInfo.status = 'COMPLETED';
+            }
         }
         else if (team.balls >= maxBalls || team.wickets >= 10) {
             if (newState.matchInfo.currentInnings === 1) {
                 newState.matchInfo.status = 'BREAK';
                 newState.matchInfo.lastEvent = 'INNINGS_END';
             } else {
-                newState.matchInfo.status = 'COMPLETED';
-                newState.matchInfo.lastEvent = 'WIN';
+                if (this.state.matchInfo.status !== 'COMPLETED') {
+                    newState.matchInfo.status = 'COMPLETED';
+                    newState.matchInfo.lastEvent = 'WIN';
+                    await this.saveMatchToHistory(newState);
+                } else {
+                    newState.matchInfo.status = 'COMPLETED';
+                }
             }
         }
 
         await this.syncToCloud(newState);
+    },
+
+    async saveMatchToHistory(state) {
+        try {
+            const { teamA, teamB, target, battingFirst } = state.matchInfo;
+            const scoringTeamKey = (battingFirst === teamA.name) ? 'teamB' : 'teamA';
+            const bowlingTeamKey = (scoringTeamKey === 'teamA' ? 'teamB' : 'teamA');
+
+            const battingTeam = state.matchInfo[scoringTeamKey];
+            const bowlingTeam = state.matchInfo[bowlingTeamKey];
+
+            let resultText = "";
+            if (battingTeam.score >= target) {
+                resultText = `${battingTeam.name} won by ${10 - battingTeam.wickets} wickets`;
+            } else if (battingTeam.score < target - 1) {
+                resultText = `${bowlingTeam.name} won by ${target - 1 - battingTeam.score} runs`;
+            } else {
+                resultText = "Match Tied";
+            }
+
+            const historyData = {
+                teams: { teamA, teamB },
+                battingFirst,
+                target,
+                result: resultText,
+                finalScores: {
+                    teamA: { score: teamA.score, wickets: teamA.wickets, balls: teamA.balls },
+                    teamB: { score: teamB.score, wickets: teamB.wickets, balls: teamB.balls }
+                },
+                timestamp: Date.now()
+            };
+
+            await RealtimeSync.addToCollection('cricketHistory', historyData);
+            console.log("Match history saved successfully!");
+        } catch (error) {
+            console.error("Failed to save match history:", error);
+        }
     },
 
     async startNextInnings() {
@@ -161,6 +223,14 @@ window.CricketEngine = {
         newState.batting.striker = { name: 'Striker', runs: 0, balls: 0, fours: 0, sixes: 0 };
         newState.batting.nonStriker = { name: 'Non-Striker', runs: 0, balls: 0, fours: 0, sixes: 0 };
         newState.bowling.currentBowler = { name: 'Bowler', runs: 0, wickets: 0, balls: 0 };
+
+        // Initialize stats for 2nd innings
+        newState.stats = {
+            crr: "0.00",
+            ballsLeft: newState.matchInfo.totalOvers * 6,
+            runsNeeded: newState.matchInfo.target,
+            rrr: ((newState.matchInfo.target / (newState.matchInfo.totalOvers * 6)) * 6).toFixed(2)
+        };
 
         await this.syncToCloud(newState);
     },

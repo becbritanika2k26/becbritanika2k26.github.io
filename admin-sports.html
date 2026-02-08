@@ -72,6 +72,7 @@
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <a href="live-score.html" target="_blank" style="text-decoration: none; padding: 10px 15px; background: var(--accent-blue); color: #000; border-radius: 8px; font-weight: 900; font-size: 0.7rem;">📺 TV VIEW</a>
+                    <a href="history.html" style="text-decoration: none; padding: 10px 15px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border-radius: 8px; font-weight: 900; font-size: 0.7rem;">📊 HISTORY</a>
                     <a href="index.html" style="text-decoration: none; padding: 10px 15px; background: rgba(255,255,255,0.1); color: #fff; border-radius: 8px; font-weight: 900; font-size: 0.7rem;">🏠 EXIT</a>
                 </div>
             </div>
@@ -79,6 +80,7 @@
             <div class="card-panel" style="margin-bottom: 20px; text-align: center;">
                 <div class="live-banner" id="score-val">0/0</div>
                 <div style="color: var(--accent-blue); font-size: 1.5rem; font-weight: 900; margin-top: 5px;" id="overs-val">0.0 OVERS</div>
+                <div id="crr-stat" style="color: #94a3b8; font-size: 1rem; font-weight: bold; margin-top: 5px;">CRR: 0.00</div>
                 <div id="target-val" style="color: var(--accent-gold); font-weight: 800; font-size: 1.3rem; margin-top: 10px;"></div>
             </div>
 
@@ -166,7 +168,20 @@
                 }
             }
 
-            if(target && targetVal) targetVal.innerText = "TARGET: " + target;
+            if (target && targetVal) {
+                const { runsNeeded, ballsLeft, rrr } = state.stats || {};
+                if (currentInnings === 2) {
+                    targetVal.style.display = 'block';
+                    targetVal.innerHTML = `TARGET: ${target}<br><span style="font-size: 0.9rem; color: #fff;">Need ${runsNeeded} runs in ${ballsLeft} balls (RRR: ${rrr})</span>`;
+                } else {
+                    targetVal.innerText = "1ST INNINGS";
+                }
+            } else if (targetVal) {
+                targetVal.innerText = "1ST INNINGS";
+            }
+
+            const crrEl = document.getElementById('crr-stat');
+            if (crrEl) crrEl.innerText = "CRR: " + (state.stats ? state.stats.crr : "0.00");
 
             // Sync players back to inputs if they changed on cloud
             const s = document.getElementById('sel-striker');

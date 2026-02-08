@@ -205,7 +205,19 @@
                 bigO.style.display = 'none';
             }
 
-            if(target) document.getElementById('target-info').innerText = "TARGET: " + target;
+            if(target) {
+                const { runsNeeded, ballsLeft, rrr } = state.stats || {};
+                if (currentInnings === 2) {
+                     document.getElementById('target-info').innerHTML = `TARGET: ${target}<br><span style="font-size: 0.8rem; color: #fff; opacity: 0.8;">Need ${runsNeeded} runs in ${ballsLeft} balls</span>`;
+                     document.getElementById('rr-info').innerHTML = `CRR: ${state.stats ? state.stats.crr : "0.00"} | RRR: ${rrr}`;
+                } else {
+                     document.getElementById('target-info').innerText = "1ST INNINGS";
+                     document.getElementById('rr-info').innerText = "CRR: " + (state.stats ? state.stats.crr : "0.00");
+                }
+            } else {
+                document.getElementById('target-info').innerText = "1ST INNINGS";
+                document.getElementById('rr-info').innerText = "CRR: " + (state.stats ? state.stats.crr : "0.00");
+            }
         }
     </script>
 </body>

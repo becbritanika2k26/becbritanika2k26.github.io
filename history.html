@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATCH HISTORY | BRITANIKA 2K26</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <style>
+        body {
+            background: #020617;
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+            padding: 40px 20px;
+        }
+        .history-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 20px;
+        }
+        .match-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .match-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.1);
+        }
+        .match-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent-blue);
+        }
+        .match-card.tie::before { background: #94a3b8; }
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .teams-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .team {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .team-name {
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+        .team-score {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent-blue);
+        }
+        .vs {
+            font-size: 1rem;
+            font-weight: 900;
+            opacity: 0.3;
+        }
+        .result-bar {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-blue);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 900;
+            text-align: center;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-back {
+            text-decoration: none;
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .no-data {
+            text-align: center;
+            padding: 100px 0;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="history-container">
+        <div class="header">
+            <div>
+                <h1 style="margin:0; font-size: 1.8rem; font-weight: 900; letter-spacing: -1px;">MATCH <span style="color: var(--accent-blue);">HISTORY</span></h1>
+                <p style="margin: 5px 0 0; font-size: 0.8rem; opacity: 0.6;">All completed cricket matches</p>
+            </div>
+            <a href="admin-sports.html" class="btn-back"><i class="fas fa-chevron-left"></i> BACK TO DASHBOARD</a>
+        </div>
+
+        <div id="history-list">
+            <div class="no-data">
+                <i class="fas fa-history" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                <p>Loading records from cloud...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import RealtimeSync from './js/realtimeSync.js';
+
+        async function loadHistory() {
+            const list = document.getElementById('history-list');
+            try {
+                const history = await RealtimeSync.subscribeCollection('cricketHistory', (data) => {
+                    if (data.length === 0) {
+                        list.innerHTML = '<div class="no-data"><p>No match history available yet.</p></div>';
+                        return;
+                    }
+
+                    // Sort by timestamp desc
+                    data.sort((a, b) => b.timestamp - a.timestamp);
+
+                    list.innerHTML = data.map(m => {
+                        const date = new Date(m.timestamp).toLocaleDateString() + ' ' + new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        return `
+                            <div class="match-card">
+                                <div class="match-header">
+                                    <span>${date}</span>
+                                    <span>${m.target ? 'TARGET: ' + m.target : 'FIRST INNINGS ONLY'}</span>
+                                </div>
+                                <div class="teams-row">
+                                    <div class="team">
+                                        <span class="team-name">${m.teams.teamA.name}</span>
+                                        <span class="team-score">${m.finalScores.teamA.score}/${m.finalScores.teamA.wickets}</span>
+                                        <span style="font-size: 0.7rem; opacity: 0.5;">${(m.finalScores.teamA.balls/6).toFixed(1)} Overs</span>
+                                    </div>
+                                    <div class="vs">VS</div>
+                                    <div class="team" style="text-align: right;">
+                                        <span class="team-name">${m.teams.teamB.name}</span>
+                                        <span class="team-score">${m.finalScores.teamB.score}/${m.finalScores.teamB.wickets}</span>
+                                        <span style="font-size: 0.7rem; opacity: 0.5;">${(m.finalScores.teamB.balls/6).toFixed(1)} Overs</span>
+                                    </div>
+                                </div>
+                                <div class="result-bar">
+                                    <i class="fas fa-trophy" style="margin-right: 8px;"></i> ${m.result}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }, 'timestamp', 'desc');
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = '<div class="no-data"><p>Error loading history. Check connection.</p></div>';
+            }
+        }
+
+        loadHistory();
+    </script>
+</body>
+</html>
