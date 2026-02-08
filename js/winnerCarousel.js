@@ -1,22 +1,26 @@
 /**
- * WinnerCarousel - Auto-rotating winner display
+ * WinnerCarousel - Auto-rotating winner display (Cloud Sync Ready)
  */
 
 window.WinnerCarousel = {
     _currentIndex: 0,
     _timer: null,
+    _winners: [],
 
     init(containerId) {
         this.container = document.getElementById(containerId);
         if (!this.container) return;
-        this.render();
         this.start();
+    },
 
-        window.addEventListener('winnerUpdate', () => this.render());
+    refresh(winners) {
+        this._winners = winners || [];
+        this.render();
     },
 
     render() {
-        const winners = window.WinnerManager.getAll();
+        if (!this.container) return;
+        const winners = this._winners;
         if (winners.length === 0) {
             this.container.innerHTML = '<div class="no-winners">Awaiting Results...</div>';
             return;
@@ -42,9 +46,9 @@ window.WinnerCarousel = {
     },
 
     next() {
-        const winners = window.WinnerManager.getAll().slice(0, 5);
-        if (winners.length <= 1) return;
-        this._currentIndex = (this._currentIndex + 1) % winners.length;
+        const count = Math.min(this._winners.length, 5);
+        if (count <= 1) return;
+        this._currentIndex = (this._currentIndex + 1) % count;
         this.updateSlide();
     },
 

@@ -42,8 +42,21 @@
         </div>
     </div>
 
-    <script src="js/eventManager.js"></script>
     <script src="js/renderer.js"></script>
     <script src="js/main.js"></script>
+    <script type="module">
+        import './js/cloudConfig.js';
+        import './js/eventEngine.js';
+        import './js/adminController.js';
+
+        window.AdminController.initConnectionIndicator();
+
+        window.EventEngine.init((type, data) => {
+            if (type === 'events') {
+                window.mainController.renderCards('cultural-container', 'cultural');
+            }
+        });
+    </script>
 </body>
 </html>
+

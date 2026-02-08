@@ -149,7 +149,22 @@
         </section>
     </main>
 
-    <script src="js/winnerManager.js"></script>
-    <script src="js/adminWinnerController.js"></script>
+    <script type="module">
+        import './js/adminController.js';
+        import './js/winnerEngine.js';
+        import './js/adminWinnerController.js';
+
+        // Auth logic
+        window.AdminController.initAuth((user) => {
+            if (user) {
+                document.body.style.display = 'block';
+            } else {
+                // AdminController handles redirect
+            }
+        });
+
+        window.AdminController.initConnectionIndicator();
+    </script>
 </body>
 </html>
+

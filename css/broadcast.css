@@ -55,10 +55,11 @@ body {
 
 .team-details h2 {
     margin: 0;
-    font-size: 2.5rem;
+    font-size: clamp(1.2rem, 5vw, 2.5rem);
     font-weight: 900;
     text-transform: uppercase;
 }
+
 
 .big-score {
     font-size: 5rem;
@@ -247,25 +248,28 @@ body {
     }
 
     .live-banner {
-        font-size: 3.5rem;
+        font-size: clamp(2.5rem, 15vw, 4rem);
     }
 
     .scoring-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
     }
 
     .score-btn {
-        height: 50px;
-        font-size: 1.2rem;
+        height: 45px;
+        font-size: 1rem;
+        border-radius: 6px;
     }
 
-    .team-details h2 {
-        font-size: 1.5rem;
+    .score-btn.wicket {
+        font-size: 0.8rem;
     }
 
     .big-score {
-        font-size: 3.5rem;
+        font-size: clamp(2.5rem, 15vw, 5rem);
     }
+
 }
 
 /* --- ADMIN RESPONSIVE FIXES --- */

@@ -111,37 +111,19 @@
         <div style="clear: both;"></div>
     </div>
 
-    <script src="js/fetchData.js"></script>
     <script src="js/main.js"></script>
-    <script>
-        let allEvents = [];
+    <script type="module">
+        import './js/cloudConfig.js';
+        import './js/eventEngine.js';
+        import './js/adminController.js';
 
-        async function initSchedule() {
-            const sports = await DataManager.getSports();
-            const cultural = await DataManager.getCultural();
-            const other = await DataManager.getOtherEvents();
+        window.AdminController.initConnectionIndicator();
 
-            allEvents = [
-                ...sports.map(e => ({ ...e, type: 'sports' })),
-                ...cultural.map(e => ({ ...e, type: 'cultural' })),
-                ...other.map(e => ({ ...e, type: 'other' }))
-            ].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            renderTimeline(allEvents);
-        }
-
-        function renderTimeline(events) {
-            const container = document.getElementById('timeline-container');
-            container.innerHTML = events.map(event => `
-                <div class="timeline-item">
-                    <div style="color: var(--primary); font-weight: 600;">${event.date} | ${event.time}</div>
-                    <h3 style="margin: 0.5rem 0;">${event.name}</h3>
-                    <div style="color: var(--text-dim); font-size: 0.9rem;">
-                        <i class="fas fa-map-marker-alt"></i> ${event.venue}
-                    </div>
-                </div>
-            `).join('');
-        }
+        window.EventEngine.init((type, data) => {
+            if (type === 'events') {
+                filterEvents();
+            }
+        });
 
         document.getElementById('search-input').addEventListener('input', filterEvents);
         document.getElementById('type-filter').addEventListener('change', filterEvents);
@@ -149,17 +131,37 @@
         function filterEvents() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             const typeFilter = document.getElementById('type-filter').value;
-
+            
+            const allEvents = Object.values(window.EventEngine.events);
             const filtered = allEvents.filter(e => {
-                const matchesSearch = e.name.toLowerCase().includes(searchTerm);
-                const matchesType = typeFilter === 'all' || e.type === typeFilter;
+                const matchesSearch = e.name.toLowerCase().includes(searchTerm) || (e.venue && e.venue.toLowerCase().includes(searchTerm));
+                const matchesType = typeFilter === 'all' || e.category === typeFilter;
                 return matchesSearch && matchesType;
-            });
+            }).sort((a, b) => (a.date > b.date) ? 1 : -1);
 
             renderTimeline(filtered);
         }
 
-        document.addEventListener('DOMContentLoaded', initSchedule);
+        function renderTimeline(events) {
+            const container = document.getElementById('timeline-container');
+            if (!container) return;
+            
+            if (events.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding: 2rem; opacity: 0.5;">No events matching filters.</div>';
+                return;
+            }
+
+            container.innerHTML = events.map(event => `
+                <div class="timeline-item">
+                    <div style="color: var(--primary); font-weight: 600;">${event.date || 'TBA'} | ${event.time || 'TBA'}</div>
+                    <h3 style="margin: 0.5rem 0;">${event.name}</h3>
+                    <div style="color: var(--text-dim); font-size: 0.9rem;">
+                        <i class="fas fa-map-marker-alt"></i> ${event.venue || 'Main Campus'}
+                    </div>
+                </div>
+            `).join('');
+        }
     </script>
 </body>
 </html>
+

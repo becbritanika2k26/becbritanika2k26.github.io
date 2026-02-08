@@ -1,16 +1,20 @@
 /**
- * WinnerWall - Full grid of all winners with filtering
+ * WinnerWall - Full grid of all winners with filtering (Cloud Sync Ready)
  */
 
 window.WinnerWall = {
     _filter: 'all',
     _search: '',
+    _winners: [],
 
     init(containerId) {
         this.container = document.getElementById(containerId);
         if (!this.container) return;
+    },
+
+    refresh(winners) {
+        this._winners = winners || [];
         this.render();
-        window.addEventListener('winnerUpdate', () => this.render());
     },
 
     setFilter(cat) {
@@ -24,7 +28,8 @@ window.WinnerWall = {
     },
 
     render() {
-        let winners = window.WinnerManager.getAll();
+        if (!this.container) return;
+        let winners = this._winners;
 
         if (this._filter !== 'all') {
             winners = winners.filter(w => w.category === this._filter);
@@ -38,7 +43,7 @@ window.WinnerWall = {
         }
 
         if (winners.length === 0) {
-            this.container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-dim);">No winners successfully recorded for this category yet.</div>`;
+            this.container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-dim);">No winners recorded for this category yet.</div>`;
             return;
         }
 

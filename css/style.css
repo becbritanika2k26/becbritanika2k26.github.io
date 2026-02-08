@@ -19,6 +19,28 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Outfit', sans-serif;
+    transition: var(--transition);
+}
+
+@keyframes updatePulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.02);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.update-animate {
+    animation: updatePulse 0.5s ease;
 }
 
 body {
@@ -98,19 +120,22 @@ nav {
 
 @media (max-width: 480px) {
     .logo-text span {
-        font-size: 0.55rem;
-        max-width: 150px;
+        font-size: 0.5rem;
+        max-width: 120px;
+        line-height: 1.1;
     }
 
     .nav-logo-img {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
     }
 
     .logo {
-        font-size: 1.1rem;
+        font-size: 1rem;
+        gap: 8px;
     }
 }
+
 
 .nav-links {
     display: flex;
@@ -1110,30 +1135,77 @@ nav {
         padding: 60px 5%;
     }
 
-    .section-title {
-        font-size: 1.8rem;
+    .filter-scroll {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
     }
+
+    .filter-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+    }
+
 
     .nav-links {
         display: none;
         flex-direction: column;
-        position: absolute;
-        top: 80px;
-        left: 0;
-        width: 100%;
-        background: var(--bg-glass);
-        padding: 2rem;
-        border-bottom: 1px solid var(--glass-border);
-        text-align: center;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: #0f172a;
+        padding: 80px 2rem 2rem;
+        border-left: 1px solid var(--glass-border);
+        transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+        z-index: 999;
     }
 
     .nav-links.active {
         display: flex;
+        right: 0;
+    }
+
+    .nav-links li {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 1.5rem;
+    }
+
+    .nav-links a {
+        font-size: 1.2rem;
+        display: block;
     }
 
     .mobile-menu-btn {
         display: block;
+        z-index: 1001;
     }
+
+    .nav-active-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        display: none;
+        z-index: 998;
+    }
+
+    .nav-active-overlay.active {
+        display: block;
+    }
+
 
     .hero h1 {
         font-size: 2.2rem;
@@ -1146,13 +1218,18 @@ nav {
     }
 
     .countdown-item {
-        min-width: 80px;
-        padding: 0.8rem;
+        min-width: 70px;
+        padding: 0.6rem;
     }
 
     .countdown-item span {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
+
+    .countdown-item label {
+        font-size: 0.6rem;
+    }
+
 
     .modal {
         padding: 1.5rem;

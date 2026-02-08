@@ -162,13 +162,14 @@
     <section class="container" style="margin-top: 4rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
             <div class="section-title" style="margin: 0; text-align: left;">Winner's Wall</div>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('all')">All</button>
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('Outdoor Sports')">Outdoor</button>
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('Indoor Events')">Indoor</button>
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('Cultural')">Cultural</button>
-                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="window.WinnerWall.setFilter('Technical')">Technical</button>
+            <div class="filter-scroll">
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('all')">All</button>
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('Outdoor Sports')">Outdoor</button>
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('Indoor Events')">Indoor</button>
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('Cultural')">Cultural</button>
+                <button class="btn btn-glass" style="padding: 0.5rem 1rem; font-size: 0.8rem; white-space: nowrap;" onclick="window.WinnerWall.setFilter('Technical')">Technical</button>
             </div>
+
         </div>
         <div class="card-grid" id="winner-wall-grid">
             <!-- Dynamic Winner Cards -->
@@ -181,20 +182,54 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="js/eventManager.js"></script>
     <script src="js/renderer.js"></script>
-    <script src="js/winnerManager.js"></script>
     <script src="js/winnerRenderer.js"></script>
     <script src="js/winnerPopup.js"></script>
     <script src="js/winnerCarousel.js"></script>
     <script src="js/winnerWall.js"></script>
     <script src="js/main.js"></script>
     <script src="js/spotlight.js"></script>
-    <script>
+    <script type="module">
+        import './js/cloudConfig.js';
+        import './js/cricketEngine.js';
+        import './js/winnerEngine.js';
+        import './js/eventEngine.js';
+        import './js/adminController.js';
+
+        // Initialize Connection Indicator
+        window.AdminController.initConnectionIndicator();
+
+        // Initialize Engines
+        window.CricketEngine.initSync((state) => {
+            const liveIndicator = document.getElementById('live-indicator-hero');
+            const heroTeam = document.getElementById('hero-live-team');
+            if (state && state.matchInfo && state.matchInfo.status === 'LIVE') {
+                if (liveIndicator) liveIndicator.style.display = 'flex';
+                if (heroTeam) heroTeam.innerText = `${state.matchInfo.teamA.name} VS ${state.matchInfo.teamB.name} (${state.matchInfo.teamA.score}/${state.matchInfo.teamA.wickets})`;
+            } else {
+                if (liveIndicator) liveIndicator.style.display = 'none';
+            }
+        });
+
+        window.WinnerEngine.init((winners) => {
+            if (window.WinnerCarousel) window.WinnerCarousel.refresh(winners);
+            if (window.WinnerWall) window.WinnerWall.refresh(winners);
+        });
+
+        window.EventEngine.init((type, data) => {
+            if (type === 'settings' && data.targetDate) {
+                // Update countdown target if needed
+                window.targetDate = data.targetDate;
+            }
+            if (type === 'spotlight') {
+               if (window.SpotlightManager) window.SpotlightManager.render(data);
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
-            if (window.WinnerCarousel) window.WinnerCarousel.init('winner-carousel-main');
-            if (window.WinnerWall) window.WinnerWall.init('winner-wall-grid');
+             // Main.js already runs some init, we might need to bridge
         });
     </script>
 </body>
 </html>
+

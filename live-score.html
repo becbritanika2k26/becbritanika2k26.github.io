@@ -119,22 +119,33 @@
         <h3 id="overlay-sub" style="color: var(--accent-gold); font-size: 1.5rem;">TARGET: 0</h3>
     </div>
 
-    <script src="js/storageManager.js"></script>
-    <script src="js/cricketEngine.js"></script>
-    <script>
+    <script type="module">
+        import './js/cloudConfig.js';
+        import './js/cricketEngine.js';
+        import './js/adminController.js';
+
         let lastLoggedEvent = null;
+
+        // Initialize Connection Indicator
+        window.AdminController.initConnectionIndicator();
+
+        // Initialize Cricket Sync
+        window.CricketEngine.initSync((state) => {
+            updateDisplay(state);
+        });
 
         function triggerFX(type) {
             const overlay = document.getElementById('fx-overlay');
             const text = document.getElementById('fx-text');
-            text.innerText = type;
-            text.className = 'event-card ' + type.toLowerCase();
-            overlay.style.display = 'flex';
-            setTimeout(() => { overlay.style.display = 'none'; }, 2000);
+            if (overlay && text) {
+                text.innerText = type;
+                text.className = 'event-card ' + type.toLowerCase();
+                overlay.style.display = 'flex';
+                setTimeout(() => { overlay.style.display = 'none'; }, 2000);
+            }
         }
 
-        function updateDisplay() {
-            const state = window.CricketEngine.load();
+        function updateDisplay(state) {
             if(!state) return;
 
             const { teamA, teamB, currentInnings, target, status, lastEvent } = state.matchInfo;
@@ -195,8 +206,7 @@
 
             if(target) document.getElementById('target-info').innerText = "TARGET: " + target;
         }
-
-        window.onload = function() { updateDisplay(); setInterval(updateDisplay, 1000); };
     </script>
 </body>
 </html>
+

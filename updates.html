@@ -55,29 +55,37 @@
         </div>
     </div>
 
-    <script src="js/eventManager.js"></script>
-    <script src="js/renderer.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/fetchData.js"></script>
-    <script>
-        async function loadUpdates() {
-            const updates = await DataManager.getUpdates();
+    <script type="module">
+        import './js/cloudConfig.js';
+        import './js/winnerEngine.js';
+        import './js/adminController.js';
+
+        window.AdminController.initConnectionIndicator();
+
+        window.WinnerEngine.init((winners) => {
             const container = document.getElementById('updates-container');
-            
-            container.innerHTML = updates.map(u => `
+            if (winners.length === 0) {
+                container.innerHTML = '<div class="card" style="text-align: center;">Awaiting live results and announcements...</div>';
+                return;
+            }
+
+            container.innerHTML = winners.map(u => `
                 <div class="card update-card">
                     <div class="update-time">
-                        <i class="far fa-clock"></i> ${u.time}
-                        <span class="badge">${u.type}</span>
+                        <i class="far fa-clock"></i> ${new Date(u.timestamp).toLocaleTimeString()}
+                        <span class="badge">${u.category}</span>
                     </div>
-                    ${u.image ? `<img src="${u.image}" alt="${u.title}" style="width: 100%; border-radius: 15px; margin-bottom: 1.5rem; border: 1px solid var(--glass-border);">` : ''}
-                    <h3>${u.title}</h3>
-                    <p style="color: var(--text-dim);">${u.content}</p>
+                    <h3>${u.eventName} - RESULTS</h3>
+                    <p style="color: var(--text-dim);">
+                        <b>1st:</b> ${u.winners.first}<br>
+                        ${u.winners.second ? `<b>2nd:</b> ${u.winners.second}<br>` : ''}
+                        ${u.winners.third ? `<b>3rd:</b> ${u.winners.third}` : ''}
+                    </p>
+                    <div style="margin-top: 10px; font-size: 0.8rem; opacity: 0.6;">Mode: ${u.mode}</div>
                 </div>
             `).join('');
-        }
-
-        document.addEventListener('DOMContentLoaded', loadUpdates);
+        });
     </script>
 </body>
 </html>
+

@@ -1,99 +1,92 @@
 /**
- * AdminController - Handles interaction between Admin UI and CricketEngine
+ * AdminController - Unified Admin & Auth Manager
+ * BEC Britanika 2K26
  */
-import CricketEngine from './cricketEngine.js';
-import AnimationEngine from './animationEngine.js';
 
-class AdminController {
-    constructor() {
-        this.init();
-    }
+import { auth } from './cloudConfig.js';
+import {
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    init() {
-        // Use a safer polling mechanism for event binding to ensure elements are ready
-        const bindInterval = setInterval(() => {
-            const buttons = document.querySelectorAll('.score-btn');
-            if (buttons.length > 0) {
-                this.bindEvents();
-                clearInterval(bindInterval);
+window.AdminController = {
+    user: null,
+
+    initAuth(onStatusChange) {
+        onAuthStateChanged(auth, (user) => {
+            this.user = user;
+            if (onStatusChange) onStatusChange(user);
+
+            // Auto-redirect if not logged in and on an admin page
+            const path = window.location.pathname;
+            if (!user && path.includes('admin-')) {
+                // Not logged in, but on admin page
+                window.location.href = 'admin.html';
             }
-        }, 500);
-    }
-
-    bindEvents() {
-        console.log("AdminController: Binding Events...");
-
-        // Score buttons (0-6)
-        document.querySelectorAll('.score-btn[data-run]').forEach(btn => {
-            btn.onclick = (e) => {
-                const run = parseInt(e.currentTarget.dataset.run);
-                CricketEngine.addBall('RUNS', run);
-                if (run === 4) AnimationEngine.trigger('4');
-                if (run === 6) AnimationEngine.trigger('6');
-                this.refresh();
-            };
         });
+    },
 
-        // Special Buttons
-        const setup = (id, type, anim) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.onclick = () => {
-                    CricketEngine.addBall(type);
-                    if (anim) AnimationEngine.trigger(anim);
-                    this.refresh();
-                };
-            }
-        };
-
-        setup('btn-wicket', 'WICKET', 'W');
-        setup('btn-wide', 'WIDE');
-        setup('btn-no-ball', 'NO_BALL');
-
-        const undoBtn = document.getElementById('btn-undo');
-        if (undoBtn) {
-            undoBtn.onclick = () => {
-                CricketEngine.undo();
-                this.refresh();
-            };
+    async login(email, password) {
+        try {
+            return await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            console.error("Login Error:", error);
+            throw error;
         }
+    },
 
-        // Player Dropdowns
-        document.querySelectorAll('.player-sync').forEach(el => {
-            el.onchange = () => {
-                const striker = document.getElementById('select-striker').value;
-                const nonStriker = document.getElementById('select-non-striker').value;
-                const bowler = document.getElementById('select-bowler').value;
-                CricketEngine.setActivePlayers(striker, nonStriker, bowler);
-                this.refresh();
-            };
-        });
+    async logout() {
+        try {
+            await signOut(auth);
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error("Logout Error:", error);
+        }
+    },
 
-        // Global Key listener
-        document.onkeydown = (e) => {
-            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+    /**
+     * Connection Status UI Helper
+     */
+    initConnectionIndicator() {
+        const indicator = document.createElement('div');
+        indicator.id = 'cloud-status-indicator';
+        indicator.style = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: none;
+            transition: 0.3s;
+        `;
+        indicator.innerHTML = `<span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;" id="status-dot"></span> <span id="status-text">CONNECTING...</span>`;
+        document.body.appendChild(indicator);
 
-            const key = e.key.toLowerCase();
-            if (key >= '0' && key <= '6' && key !== '5') {
-                const run = parseInt(key);
-                CricketEngine.addBall('RUNS', run);
-                if (run === 4) AnimationEngine.trigger('4');
-                if (run === 6) AnimationEngine.trigger('6');
-                this.refresh();
-            } else if (key === 'w') {
-                CricketEngine.addBall('WICKET');
-                AnimationEngine.trigger('W');
-                this.refresh();
-            } else if (key === 'u') {
-                CricketEngine.undo();
-                this.refresh();
+        window.addEventListener('cloudConnectionChanged', (e) => {
+            const status = e.detail;
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+
+            if (status === 'LIVE') {
+                dot.style.background = '#22c55e';
+                dot.style.boxShadow = '0 0 10px #22c55e';
+                text.innerText = 'LIVE CLOUD';
+            } else {
+                dot.style.background = '#ef4444';
+                dot.style.boxShadow = '0 0 10px #ef4444';
+                text.innerText = 'OFFLINE';
             }
-        };
+        });
     }
-
-    refresh() {
-        if (window.updateAdminUI) window.updateAdminUI();
-    }
-}
-
-export default new AdminController();
+};

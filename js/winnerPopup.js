@@ -1,5 +1,5 @@
 /**
- * WinnerPopup & Confetti Helper
+ * WinnerPopup & Confetti Helper (Cloud Sync Ready)
  */
 
 window.WinnerPopup = {
@@ -17,26 +17,21 @@ window.WinnerPopup = {
             `;
             document.body.appendChild(container);
         }
-        this.check();
-        setInterval(() => this.check(), 10000);
-    },
-
-    check() {
-        const winners = window.WinnerManager.getAll();
-        if (winners.length > 0) {
-            const latest = winners[0];
-            // Only popup if it's "New" and we haven't shown it this session
-            if (latest.isNew && latest.id !== this._lastId && !sessionStorage.getItem('shown_' + latest.id)) {
-                this.trigger(latest);
-            }
-        }
+        // Removed polling check() - WinnerEngine calls trigger() directly
     },
 
     trigger(w) {
+        if (!w || this._lastId === w.id) return;
+
+        // Prevent multiple popups for same winner in same session
+        if (sessionStorage.getItem('shown_' + w.id)) return;
+
         this._lastId = w.id;
         sessionStorage.setItem('shown_' + w.id, 'true');
 
         const content = document.getElementById('popup-content');
+        if (!content) return;
+
         content.innerHTML = `
             <div class="popup-top">
                 <i class="fas fa-trophy winner-animate"></i>
@@ -51,19 +46,19 @@ window.WinnerPopup = {
         `;
 
         const popup = document.getElementById('winner-popup');
-        popup.classList.add('active');
-
-        this.startConfetti();
-
-        setTimeout(() => this.hide(), 10000); // Hide after 10s
+        if (popup) {
+            popup.classList.add('active');
+            this.startConfetti();
+            setTimeout(() => this.hide(), 10000); // Hide after 10s
+        }
     },
 
     hide() {
-        document.getElementById('winner-popup').classList.remove('active');
+        const popup = document.getElementById('winner-popup');
+        if (popup) popup.classList.remove('active');
     },
 
     startConfetti() {
-        // Simple Canvas Confetti
         const canvas = document.createElement('canvas');
         canvas.style.position = 'fixed';
         canvas.style.top = '0';
@@ -95,7 +90,7 @@ window.WinnerPopup = {
         }
 
         let animationFrame;
-        function draw() {
+        const draw = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             pieces.forEach((p, i) => {
                 p.tiltAngle += p.tiltAngleIncremental;
@@ -114,12 +109,12 @@ window.WinnerPopup = {
                 }
             });
             animationFrame = requestAnimationFrame(draw);
-        }
+        };
 
         draw();
         setTimeout(() => {
             cancelAnimationFrame(animationFrame);
-            document.body.removeChild(canvas);
+            if (document.body.contains(canvas)) document.body.removeChild(canvas);
         }, 6000);
     }
 };

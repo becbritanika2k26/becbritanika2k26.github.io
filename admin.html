@@ -86,7 +86,23 @@
         <p style="opacity: 0.7;">BEC BRITANIKA 2K26 — Official Management System</p>
     </div>
 
-    <div class="container">
+    <div class="container" id="admin-login-section" style="display: none; max-width: 400px;">
+        <div class="admin-card">
+            <div class="card-icon icon-blue">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2>Admin Login</h2>
+            <p>Access the control center with your credentials.</p>
+            <div style="width: 100%; text-align: left;">
+                <input type="email" id="login-email" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff;">
+                <input type="password" id="login-password" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff;">
+                <button id="btn-login" class="btn-go" style="width: 100%; cursor: pointer; border: none;">Login to System</button>
+                <p id="login-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 10px; display: none;"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="admin-nav-section" style="display: none;">
         <div class="admin-grid">
             
             <a href="admin-sports.html" class="admin-card">
@@ -113,13 +129,14 @@
                 </div>
                 <h2>Winner Broadcast Hub</h2>
                 <p>Announce winners with animations, confetti, and leaderboard updates.</p>
-                <div class="btn-go">Broadcast Won ▶</div>
+                <div class="btn-go">Broadcast Win ▶</div>
             </a>
 
         </div>
 
-        <div style="margin-top: 40px; text-align: center;">
+        <div style="margin-top: 40px; text-align: center; display: flex; flex-direction: column; gap: 15px;">
             <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: bold;"><i class="fas fa-home"></i> Back to Public Website</a>
+            <button id="btn-logout" style="background: transparent; color: var(--danger); border: none; font-weight: bold; cursor: pointer; opacity: 0.7;">Logout Session</button>
         </div>
     </div>
 
@@ -127,5 +144,40 @@
         &copy; 2026 BRITANIKA 2K26 Digital Management System
     </div>
 
+    <script type="module">
+        import './js/adminController.js';
+
+        window.AdminController.initAuth((user) => {
+            const loginSec = document.getElementById('admin-login-section');
+            const navSec = document.getElementById('admin-nav-section');
+            
+            if (user) {
+                loginSec.style.display = 'none';
+                navSec.style.display = 'block';
+            } else {
+                loginSec.style.display = 'block';
+                navSec.style.display = 'none';
+            }
+        });
+
+        window.AdminController.initConnectionIndicator();
+
+        document.getElementById('btn-login').onclick = async () => {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            
+            try {
+                await window.AdminController.login(email, pass);
+            } catch (err) {
+                errorEl.innerText = "Invalid credentials. Please check again.";
+                errorEl.style.display = 'block';
+            }
+        };
+
+        document.getElementById('btn-logout').onclick = () => window.AdminController.logout();
+    </script>
+
 </body>
 </html>
+

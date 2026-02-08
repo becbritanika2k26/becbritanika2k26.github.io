@@ -8,24 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/broadcast.css">
 </head>
-<body class="admin-theme" style="display: none;">
-    <script src="js/storageManager.js"></script>
-    <script src="js/cricketEngine.js"></script>
-
-    <script>
-        if (sessionStorage.getItem('admin_auth') === "2026") {
-            document.body.style.display = 'block';
-        } else {
-            const pin = prompt("ENTER ADMIN ACCESS PIN (2026):");
-            if (pin === "2026") {
-                sessionStorage.setItem('admin_auth', '2026');
-                document.body.style.display = 'block';
-            } else {
-                alert("ACCESS DENIED");
-                window.location.href = "index.html";
-            }
-        }
-    </script>
+<body class="admin-theme">
+    <div id="auth-wall" style="position: fixed; top:0; left:0; width:100%; height:100%; background: #020617; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+        <h2 style="color: #38bdf8;">ADMIN ACCESS REQUIRED</h2>
+        <p style="opacity: 0.7; margin-bottom: 20px;">Please login at the main admin portal to access management tools.</p>
+        <a href="admin.html" class="btn-main" style="text-decoration: none; background: #38bdf8; color: #000; padding: 12px 25px; border-radius: 8px;">GO TO LOGIN PAGE</a>
+    </div>
 
     <!-- Innings Break Overlay -->
     <div id="break-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box;">
@@ -98,17 +86,18 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px;">
                     <div class="input-group">
                         <label>STRIKER</label>
-                        <select id="sel-striker" class="p-sync"></select>
+                        <input type="text" id="sel-striker" class="p-sync" placeholder="Type name...">
                     </div>
                     <div class="input-group">
                         <label>NON-STRIKER</label>
-                        <select id="sel-non-striker" class="p-sync"></select>
+                        <input type="text" id="sel-non-striker" class="p-sync" placeholder="Type name...">
                     </div>
                     <div class="input-group">
                         <label>BOWLER</label>
-                        <select id="sel-bowler" class="p-sync"></select>
+                        <input type="text" id="sel-bowler" class="p-sync" placeholder="Type name...">
                     </div>
                 </div>
+
 
                 <div class="scoring-grid">
                     <button class="score-btn" onclick="addRun(0)">0</button>
@@ -126,36 +115,65 @@
         </main>
     </div>
 
-    <script>
-        function refreshUI() {
-            const state = window.CricketEngine.load();
+    <script type="module">
+        import './js/adminController.js';
+        import './js/cricketEngine.js';
+
+        // Auth logic
+        window.AdminController.initAuth((user) => {
+            if (user) {
+                document.getElementById('auth-wall').style.display = 'none';
+                // Initialize Cloud Sync
+                window.CricketEngine.initSync((state) => {
+                    refreshUI(state);
+                });
+            }
+        });
+
+        window.AdminController.initConnectionIndicator();
+
+        function refreshUI(state) {
             if(!state) return;
 
             const { teamA, teamB, currentInnings, status, target } = state.matchInfo;
             const curTeam = (state.matchInfo.battingFirst === teamA.name) ? (currentInnings === 1 ? teamA : teamB) : (currentInnings === 1 ? teamB : teamA);
 
-            document.getElementById('score-val').innerText = curTeam.score + "/" + curTeam.wickets;
-            document.getElementById('overs-val').innerText = Math.floor(curTeam.balls/6) + "." + (curTeam.balls%6) + " OVERS";
-            document.getElementById('match-display-title').innerText = teamA.name + " VS " + teamB.name;
+            const scoreVal = document.getElementById('score-val');
+            const oversVal = document.getElementById('overs-val');
+            const titleVal = document.getElementById('match-display-title');
+            
+            if (scoreVal) scoreVal.innerText = curTeam.score + "/" + curTeam.wickets;
+            if (oversVal) oversVal.innerText = Math.floor(curTeam.balls/6) + "." + (curTeam.balls%6) + " OVERS";
+            if (titleVal) titleVal.innerText = teamA.name + " VS " + teamB.name;
             
             const pill = document.getElementById('status-pill');
-            if(status === 'BREAK') {
-                pill.innerText = "BREAK"; pill.className = "status-badge status-break";
-                document.getElementById('break-overlay').style.display = 'flex';
-                document.getElementById('final-innings-score').innerText = curTeam.score + "/" + curTeam.wickets;
-                document.getElementById('target-msg').innerText = "TARGET: " + (curTeam.score + 1);
-            } else if(status === 'COMPLETED') {
-                pill.innerText = "DONE"; pill.className = "status-badge status-break";
-                document.getElementById('match-over-overlay').style.display = 'flex';
-                const winner = determineWinner(state);
-                document.getElementById('match-winner-text').innerText = winner + " WON!";
-            } else {
-                pill.innerText = "LIVE"; pill.className = "status-badge status-live";
-                document.getElementById('break-overlay').style.display = 'none';
-                document.getElementById('match-over-overlay').style.display = 'none';
+            if (pill) {
+                if(status === 'BREAK') {
+                    pill.innerText = "BREAK"; pill.className = "status-badge status-break";
+                    document.getElementById('break-overlay').style.display = 'flex';
+                    document.getElementById('final-innings-score').innerText = curTeam.score + "/" + curTeam.wickets;
+                    document.getElementById('target-msg').innerText = "TARGET: " + (curTeam.score + 1);
+                } else if(status === 'COMPLETED') {
+                    pill.innerText = "DONE"; pill.className = "status-badge status-break";
+                    document.getElementById('match-over-overlay').style.display = 'flex';
+                    const winner = determineWinner(state);
+                    document.getElementById('match-winner-text').innerText = winner + " WON!";
+                } else {
+                    pill.innerText = "LIVE"; pill.className = "status-badge status-live";
+                    document.getElementById('break-overlay').style.display = 'none';
+                    document.getElementById('match-over-overlay').style.display = 'none';
+                }
             }
 
-            if(target) document.getElementById('target-val').innerText = "TARGET: " + target;
+            if(target && targetVal) targetVal.innerText = "TARGET: " + target;
+
+            // Sync players back to inputs if they changed on cloud
+            const s = document.getElementById('sel-striker');
+            const ns = document.getElementById('sel-non-striker');
+            const b = document.getElementById('sel-bowler');
+            if (s && document.activeElement !== s) s.value = state.batting.striker.name;
+            if (ns && document.activeElement !== ns) ns.value = state.batting.nonStriker.name;
+            if (b && document.activeElement !== b) b.value = state.bowling.currentBowler.name;
         }
 
         function determineWinner(state) {
@@ -167,36 +185,48 @@
             return bowlingTeam.name;
         }
 
-        function forceSetPlayers() {
-            window.CricketEngine.setActivePlayers(document.getElementById('manual-striker').value, '', document.getElementById('manual-bowler').value);
-            refreshUI();
-            alert("Names applied!");
-        }
-
-        function addRun(val) { window.CricketEngine.addBall('RUNS', val); refreshUI(); }
-        function addSpecial(type) { window.CricketEngine.addBall(type); refreshUI(); }
-        function undoLast() { window.CricketEngine.undo(); refreshUI(); }
-        function startInnings2() { window.CricketEngine.startNextInnings(); location.reload(); }
-        function resetMatch() { window.StorageManager.clearAll(); location.reload(); }
-        function hideOverlay() { document.getElementById('break-overlay').style.display='none'; }
-
-        document.getElementById('main-start-btn').onclick = function() {
-            window.CricketEngine.initMatch({ 
-                teamA: document.getElementById('setup-team-a').value || 'TEAM A', 
-                teamB: document.getElementById('setup-team-b').value || 'TEAM B', 
-                totalOvers: parseInt(document.getElementById('setup-overs').value), 
-                battingFirst: document.getElementById('setup-team-a').value 
-            });
-            location.reload();
+        window.addRun = function(val) { window.CricketEngine.addBall('RUNS', val); };
+        window.addSpecial = function(type) { window.CricketEngine.addBall(type); };
+        window.undoLast = function() { window.CricketEngine.undo(); };
+        window.startInnings2 = function() { window.CricketEngine.startNextInnings(); };
+        window.resetMatch = function() { if(confirm("ERASE ALL?")) { window.CricketEngine.initMatch({teamA:'TEAM A', teamB:'TEAM B', totalOvers:10, battingFirst:'TEAM A'}); } };
+        window.hideOverlay = function() { document.getElementById('break-overlay').style.display='none'; };
+        window.forceSetPlayers = function() {
+              window.CricketEngine.setActivePlayers(
+                    document.getElementById('sel-striker').value, 
+                    document.getElementById('sel-non-striker').value, 
+                    document.getElementById('sel-bowler').value
+                );
         };
 
-        document.getElementById('main-reset-btn').onclick = function() { if(confirm("ERASE ALL?")) { window.StorageManager.clearAll(); location.reload(); } };
+        const startBtn = document.getElementById('main-start-btn');
+        if (startBtn) {
+            startBtn.onclick = function() {
+                window.CricketEngine.initMatch({ 
+                    teamA: document.getElementById('setup-team-a').value || 'TEAM A', 
+                    teamB: document.getElementById('setup-team-b').value || 'TEAM B', 
+                    totalOvers: parseInt(document.getElementById('setup-overs').value) || 10, 
+                    battingFirst: document.getElementById('setup-team-a').value || 'TEAM A'
+                });
+            };
+        }
 
-        document.querySelectorAll('.p-sync').forEach(s => {
-            s.onchange = function() { window.CricketEngine.setActivePlayers(document.getElementById('sel-striker').value, document.getElementById('sel-non-striker').value, document.getElementById('sel-bowler').value); };
+        const resetBtn = document.getElementById('main-reset-btn');
+        if (resetBtn) {
+            resetBtn.onclick = function() { if(confirm("ERASE ALL?")) { window.CricketEngine.initMatch({teamA:'TEAM A', teamB:'TEAM B', totalOvers:10, battingFirst:'TEAM A'}); } };
+        }
+
+        document.querySelectorAll('.p-sync').forEach(el => {
+            el.onblur = function() { 
+                window.CricketEngine.setActivePlayers(
+                    document.getElementById('sel-striker').value, 
+                    document.getElementById('sel-non-striker').value, 
+                    document.getElementById('sel-bowler').value
+                ); 
+            };
         });
 
-        window.onload = function() { refreshUI(); setInterval(refreshUI, 2000); };
+
     </script>
 </body>
 </html>

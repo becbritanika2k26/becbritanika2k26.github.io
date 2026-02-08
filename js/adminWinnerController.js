@@ -1,25 +1,33 @@
 /**
- * adminWinnerController - Admin Panel Logic for Winner Management
+ * adminWinnerController - Cloud Sync Admin Panel Logic for Winner Management
  */
+
+import './js/winnerEngine.js'; // Ensure WinnerEngine is loaded
 
 window.adminWinnerController = {
     init() {
         this.populateCategories();
-        this.refreshTable();
         this.bindEvents();
+
+        // Initialize Realtime Sync
+        window.WinnerEngine.init((winners) => {
+            this.refreshTable(winners);
+        });
     },
 
     populateCategories() {
-        const cats = window.WinnerManager.getCategories();
+        const cats = window.WinnerEngine.getCategories();
         const catSelect = document.getElementById('win-cat');
-        catSelect.innerHTML = `<option value="">Select Category</option>` +
-            Object.keys(cats).map(c => `<option value="${c}">${c}</option>`).join('');
+        if (catSelect) {
+            catSelect.innerHTML = `<option value="">Select Category</option>` +
+                Object.keys(cats).map(c => `<option value="${c}">${c}</option>`).join('');
+        }
     },
 
     onCategoryChange() {
         const cat = document.getElementById('win-cat').value;
         const eventSelect = document.getElementById('win-event');
-        const cats = window.WinnerManager.getCategories();
+        const cats = window.WinnerEngine.getCategories();
 
         if (cat && cats[cat]) {
             eventSelect.innerHTML = `<option value="">Select Event</option>` +
@@ -37,13 +45,16 @@ window.adminWinnerController = {
     },
 
     bindEvents() {
-        document.getElementById('winner-form').onsubmit = (e) => {
-            e.preventDefault();
-            this.handleSave();
-        };
+        const form = document.getElementById('winner-form');
+        if (form) {
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                this.handleSave();
+            };
+        }
     },
 
-    handleSave() {
+    async handleSave() {
         const cat = document.getElementById('win-cat').value;
         const eventDropdown = document.getElementById('win-event').value;
         const eventName = (eventDropdown === 'OTHER') ? document.getElementById('manual-event-name').value : eventDropdown;
@@ -60,22 +71,24 @@ window.adminWinnerController = {
         };
 
         const id = document.getElementById('edit-id').value;
-        if (id) {
-            window.WinnerManager.updateWinner(id, data);
-        } else {
-            window.WinnerManager.addWinner(data);
+        try {
+            if (id) {
+                await window.WinnerEngine.updateWinner(id, data);
+            } else {
+                await window.WinnerEngine.addWinner(data);
+            }
+            this.resetForm();
+            alert("Winner cloud-synced successfully!");
+        } catch (err) {
+            alert("Failed to save winner to cloud.");
         }
-
-        this.resetForm();
-        this.refreshTable();
-        alert("Winner broadcasted successfully!");
     },
 
-    refreshTable() {
-        const winners = window.WinnerManager.getAll();
+    refreshTable(winners) {
         const body = document.getElementById('winner-table-body');
+        if (!body) return;
 
-        if (winners.length === 0) {
+        if (!winners || winners.length === 0) {
             body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; opacity: 0.5;">No winners announced yet.</td></tr>';
             return;
         }
@@ -95,14 +108,14 @@ window.adminWinnerController = {
     },
 
     edit(id) {
-        const win = window.WinnerManager.getAll().find(w => w.id === id);
+        const win = window.WinnerEngine.winners.find(w => w.id === id);
         if (!win) return;
 
         document.getElementById('edit-id').value = win.id;
         document.getElementById('win-cat').value = win.category;
         this.onCategoryChange();
 
-        const cats = window.WinnerManager.getCategories();
+        const cats = window.WinnerEngine.getCategories();
         if (cats[win.category] && cats[win.category].includes(win.eventName)) {
             document.getElementById('win-event').value = win.eventName;
         } else {
@@ -119,18 +132,19 @@ window.adminWinnerController = {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
-    delete(id) {
+    async delete(id) {
         if (confirm("Permanently delete this winner record?")) {
-            window.WinnerManager.deleteWinner(id);
-            this.refreshTable();
+            await window.WinnerEngine.deleteWinner(id);
         }
     },
 
     resetForm() {
-        document.getElementById('winner-form').reset();
+        const form = document.getElementById('winner-form');
+        if (form) form.reset();
         document.getElementById('edit-id').value = '';
         document.getElementById('manual-event-wrap').style.display = 'none';
     }
 };
 
+// Start logic
 document.addEventListener('DOMContentLoaded', () => window.adminWinnerController.init());
