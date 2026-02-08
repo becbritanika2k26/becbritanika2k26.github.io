@@ -124,7 +124,12 @@ window.mainController = {
             if (!curTeam) return;
 
             const overs = Math.floor(curTeam.balls / 6) + "." + (curTeam.balls % 6);
-            const scoreText = `${teamA.name} VS ${teamB.name} | ${curTeam.score}/${curTeam.wickets} (${overs})`;
+            let scoreText = `${teamA.name} VS ${teamB.name} | ${curTeam.score}/${curTeam.wickets} (${overs})`;
+
+            // Add chase info if 2nd innings
+            if (currentInnings === 2 && state.stats && state.stats.runsNeeded !== null) {
+                scoreText += ` | Need ${state.stats.runsNeeded} in ${state.stats.ballsLeft}`;
+            }
 
             if (heroIndicator) heroIndicator.style.display = 'flex';
             if (heroTeamName) heroTeamName.innerText = scoreText;
