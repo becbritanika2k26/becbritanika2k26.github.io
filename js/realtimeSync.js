@@ -61,6 +61,7 @@ window.RealtimeSync = {
             await setDoc(docRef, { ...data, lastUpdated: Date.now() }, { merge: true });
         } catch (error) {
             console.error("Update failed:", error);
+            alert("CLOUD SYNC ERROR: " + error.message);
             throw error;
         }
     },
@@ -74,6 +75,7 @@ window.RealtimeSync = {
             return await addDoc(collRef, { ...data, timestamp: Date.now() });
         } catch (error) {
             console.error("Add failed:", error);
+            alert("CLOUD ADD ERROR: " + error.message);
             throw error;
         }
     },

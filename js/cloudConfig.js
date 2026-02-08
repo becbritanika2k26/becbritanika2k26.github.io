@@ -22,25 +22,44 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const rtdb = getDatabase(app);
+let app, db, auth, rtdb;
+try {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    console.log("🔥 Firebase Initialized: ", firebaseConfig.projectId);
+} catch (e) {
+    console.error("❌ Firebase Init Failed:", e);
+    alert("CRITICAL ERROR: Firebase Initialization Failed. Check browser console.");
+}
 
-// Enable Offline Persistence
-enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code == 'failed-precondition') {
-        console.warn('Persistence failed: Multiple tabs open');
-    } else if (err.code == 'unimplemented') {
-        console.warn('Persistence is not available in this browser');
+// Connectivity Test
+async function testCloudConnection() {
+    try {
+        const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        const testRef = doc(db, "_system_", "ping");
+        await setDoc(testRef, { lastPing: Date.now(), status: "OK" }, { merge: true });
+        console.log("✅ Cloud Sync active.");
+        window.dispatchEvent(new CustomEvent('cloudConnectionChanged', { detail: 'LIVE' }));
+    } catch (e) {
+        console.warn("☁️ Cloud restricted or offline:", e.message);
     }
-});
+}
+testCloudConnection();
 
-// Connection Monitoring
-const connectedRef = ref(rtdb, ".info/connected");
-onValue(connectedRef, (snap) => {
-    const status = snap.val() === true ? "LIVE" : "OFFLINE";
-    window.dispatchEvent(new CustomEvent('cloudConnectionChanged', { detail: status }));
-});
+try {
+    rtdb = getDatabase(app);
+    const connectedRef = ref(rtdb, ".info/connected");
+    onValue(connectedRef, (snap) => {
+        if (snap.val() === true) {
+            window.dispatchEvent(new CustomEvent('cloudConnectionChanged', { detail: 'LIVE' }));
+        }
+    });
+} catch (e) {
+    console.warn("RTDB not initialized:", e);
+    setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('cloudConnectionChanged', { detail: 'OFFLINE' }));
+    }, 3000);
+}
 
 export { app, db, auth, rtdb };

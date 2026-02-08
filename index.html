@@ -204,21 +204,30 @@
             const liveIndicator = document.getElementById('live-indicator-hero');
             const heroTeam = document.getElementById('hero-live-team');
             if (state && state.matchInfo && state.matchInfo.status === 'LIVE') {
+                const { teamA, teamB, currentInnings, battingFirst } = state.matchInfo;
+                const curKey = (battingFirst === teamA.name) ? (currentInnings === 1 ? 'teamA' : 'teamB') : (currentInnings === 1 ? 'teamB' : 'teamA');
+                const curTeam = state.matchInfo[curKey];
+                
                 if (liveIndicator) liveIndicator.style.display = 'flex';
-                if (heroTeam) heroTeam.innerText = `${state.matchInfo.teamA.name} VS ${state.matchInfo.teamB.name} (${state.matchInfo.teamA.score}/${state.matchInfo.teamA.wickets})`;
+                if (heroTeam) heroTeam.innerText = `${teamA.name} VS ${teamB.name} | ${curTeam.score}/${curTeam.wickets} (${Math.floor(curTeam.balls/6)}.${curTeam.balls%6})`;
             } else {
                 if (liveIndicator) liveIndicator.style.display = 'none';
             }
         });
 
         window.WinnerEngine.init((winners) => {
-            if (window.WinnerCarousel) window.WinnerCarousel.refresh(winners);
-            if (window.WinnerWall) window.WinnerWall.refresh(winners);
+            if (window.WinnerCarousel) {
+                window.WinnerCarousel.init('winner-carousel-main');
+                window.WinnerCarousel.refresh(winners);
+            }
+            if (window.WinnerWall) {
+                window.WinnerWall.init('winner-wall-grid');
+                window.WinnerWall.refresh(winners);
+            }
         });
 
         window.EventEngine.init((type, data) => {
             if (type === 'settings' && data.targetDate) {
-                // Update countdown target if needed
                 window.targetDate = data.targetDate;
             }
             if (type === 'spotlight') {
@@ -227,7 +236,7 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-             // Main.js already runs some init, we might need to bridge
+             // Main.js already runs some init
         });
     </script>
 </body>

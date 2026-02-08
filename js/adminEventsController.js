@@ -2,7 +2,7 @@
  * adminEventsController - Cloud Sync Logic for the Unified Event Admin Dashboard
  */
 
-import './js/eventEngine.js';
+import './eventEngine.js';
 
 window.adminEventsController = {
     init() {
@@ -206,5 +206,9 @@ window.closeModal = () => adminEventsController.closeModal();
 window.closeSpotlightModal = () => adminEventsController.closeSpotlightModal();
 window.filterAndRender = () => adminEventsController.refresh();
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => window.adminEventsController.init());
+// Initialize Robustly
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => window.adminEventsController.init());
+} else {
+    window.adminEventsController.init();
+}

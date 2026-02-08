@@ -2,7 +2,7 @@
  * adminWinnerController - Cloud Sync Admin Panel Logic for Winner Management
  */
 
-import './js/winnerEngine.js'; // Ensure WinnerEngine is loaded
+import './winnerEngine.js'; // Ensure WinnerEngine is loaded
 
 window.adminWinnerController = {
     init() {
@@ -146,5 +146,9 @@ window.adminWinnerController = {
     }
 };
 
-// Start logic
-document.addEventListener('DOMContentLoaded', () => window.adminWinnerController.init());
+// Start logic robustly
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => window.adminWinnerController.init());
+} else {
+    window.adminWinnerController.init();
+}

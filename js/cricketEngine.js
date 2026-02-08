@@ -74,7 +74,8 @@ window.CricketEngine = {
 
         const newState = JSON.parse(JSON.stringify(this.state));
         const { teamA, teamB, battingFirst, currentInnings } = newState.matchInfo;
-        const curKey = (battingFirst === teamA.name) ? (currentInnings === 1 ? 'teamA' : 'teamB') : (currentInnings === 1 ? 'teamB' : 'teamA');
+        const isTeamABattingFirst = String(battingFirst).toLowerCase() === String(teamA.name).toLowerCase();
+        const curKey = isTeamABattingFirst ? (currentInnings === 1 ? 'teamA' : 'teamB') : (currentInnings === 1 ? 'teamB' : 'teamA');
         const team = newState.matchInfo[curKey];
 
         newState.matchInfo.lastEvent = null;
