@@ -1,17 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
 
 :root {
+    /* Shared Brand Colors */
     --primary: #00f2fe;
     --secondary: #4facfe;
     --accent: #f093fb;
+    --glow: 0 0 20px rgba(0, 242, 254, 0.3);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Dark Mode (Default) - Premium Glassmorphism */
     --bg-dark: #0a0b10;
     --bg-card: rgba(255, 255, 255, 0.05);
     --bg-glass: rgba(10, 11, 16, 0.8);
     --text-main: #ffffff;
     --text-dim: #b0b0b0;
     --glass-border: rgba(255, 255, 255, 0.1);
-    --glow: 0 0 20px rgba(0, 242, 254, 0.3);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --nav-bg: rgba(10, 11, 16, 0.9);
+}
+
+[data-theme="light"] {
+    --bg-dark: #f8fafc;
+    --bg-card: rgba(255, 255, 255, 0.9);
+    --bg-glass: rgba(255, 255, 255, 0.85);
+    --text-main: #0f172a;
+    --text-dim: #475569;
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --nav-bg: rgba(255, 255, 255, 0.95);
 }
 
 * {
@@ -72,7 +86,7 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(10, 11, 16, 0.9);
+    background: var(--nav-bg);
     backdrop-filter: blur(15px);
     z-index: 1000;
     border-bottom: 1px solid var(--glass-border);

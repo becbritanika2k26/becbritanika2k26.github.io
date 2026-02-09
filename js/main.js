@@ -22,6 +22,7 @@ window.mainController = {
 
         document.addEventListener('DOMContentLoaded', () => {
             this.setupMobileMenu();
+            this.initThemeToggle();
         });
 
         // Listen for cloud events instead of polling
@@ -108,6 +109,59 @@ window.mainController = {
                     document.body.style.overflow = '';
                 };
             });
+        }
+    },
+
+    initThemeToggle() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        // Add toggle to navigation if it exists
+        const nav = document.querySelector('nav');
+        if (nav && !document.getElementById('theme-toggle')) {
+            const toggleBtn = document.createElement('div');
+            toggleBtn.id = 'theme-toggle';
+            toggleBtn.className = 'theme-toggle-btn';
+            toggleBtn.style = `
+                cursor: pointer;
+                font-size: 1.2rem;
+                padding: 10px;
+                color: var(--text-main);
+                transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1002;
+            `;
+
+            const updateIcon = (theme) => {
+                toggleBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+                toggleBtn.style.color = theme === 'dark' ? '#f093fb' : '#fbbf24';
+            };
+
+            updateIcon(savedTheme);
+
+            toggleBtn.onclick = () => {
+                const current = document.documentElement.getAttribute('data-theme');
+                const target = current === 'dark' ? 'light' : 'dark';
+
+                document.documentElement.setAttribute('data-theme', target);
+                localStorage.setItem('theme', target);
+                updateIcon(target);
+
+                toggleBtn.style.transform = 'scale(0.8) rotate(180deg)';
+                setTimeout(() => {
+                    toggleBtn.style.transform = 'scale(1) rotate(0)';
+                }, 300);
+            };
+
+            // Inset into nav before mobile menu btn
+            const mobileBtn = document.querySelector('.mobile-menu-btn');
+            if (mobileBtn) {
+                nav.insertBefore(toggleBtn, mobileBtn);
+            } else {
+                nav.appendChild(toggleBtn);
+            }
         }
     },
 
