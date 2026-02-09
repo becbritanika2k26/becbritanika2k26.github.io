@@ -45,15 +45,37 @@ window.WinnerRenderer = {
     },
 
     renderCarouselSlide(w) {
+        const icon = this.getCategoryIcon(w.category);
+        const winners = w.winners || {};
+        const first = winners.first || 'TBA';
+        const second = winners.second || 'TBA';
+        const third = winners.third || 'TBA';
+        const college = winners.college || 'Bhubaneswar Engineering College';
+
         return `
             <div class="carousel-slide">
-                <div class="slide-content">
-                    <div class="slide-event-type">${w.category}</div>
-                    <h2 class="slide-title">${w.eventName}</h2>
-                    <div class="slide-winner-main">
-                        <div class="crown-icon"><i class="fas fa-trophy fa-bounce"></i></div>
-                        <div class="winner-label">CHAMPION</div>
-                        <div class="winner-primary-name">${w.winners.first}</div>
+                <div class="winner-bg-icon"><i class="fas ${icon}"></i></div>
+                <div class="winner-slide-content">
+                    <div class="winner-event-tag">
+                        <i class="fas ${icon}"></i>
+                        <span>${w.category || 'Event'}</span>
+                    </div>
+                    <h2 class="winner-slide-title">${w.eventName || 'Britanika Event'}</h2>
+                    <div class="winner-main-box">
+                        <div class="winner-crown"><i class="fas fa-trophy fa-bounce"></i></div>
+                        <div class="winner-rank-label">BRITANIKA CHAMPION</div>
+                        <div class="winner-name-text">${first}</div>
+                        <div class="winner-college-text">${college}</div>
+                    </div>
+                    <div class="winner-podium-row">
+                        <div class="winner-podium-lite silver">
+                            <span class="rank-tag">2nd</span>
+                            <span class="name-tag">${second}</span>
+                        </div>
+                        <div class="winner-podium-lite bronze">
+                            <span class="rank-tag">3rd</span>
+                            <span class="name-tag">${third}</span>
+                        </div>
                     </div>
                 </div>
             </div>

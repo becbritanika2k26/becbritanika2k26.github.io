@@ -31,6 +31,38 @@
         <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
     </nav>
 
+    <div class="match-day-ticker">
+        <div class="match-ticker-track" id="match-center-track">
+            <!-- Cricket -->
+            <a href="live-score.html" class="ticker-item" id="ticker-cricket">
+                <div class="ticker-icon cri"><i class="fas fa-cricket-bat-ball"></i></div>
+                <span class="ticker-status">CRICKET</span>
+                <div class="ticker-info">
+                    <span class="ticker-teams" id="t-cri-teams">MATCH TBD</span>
+                    <span class="ticker-score" id="t-cri-score">Awaiting Toss</span>
+                </div>
+            </a>
+            <!-- Kabaddi -->
+            <a href="live-kabaddi.html" class="ticker-item" id="ticker-kabaddi">
+                <div class="ticker-icon kab"><i class="fas fa-running"></i></div>
+                <span class="ticker-status">KABADDI</span>
+                <div class="ticker-info">
+                    <span class="ticker-teams" id="t-kab-teams">MATCH TBD</span>
+                    <span class="ticker-score" id="t-kab-score">Awaiting Start</span>
+                </div>
+            </a>
+            <!-- Volleyball -->
+            <a href="live-volleyball.html" class="ticker-item" id="ticker-volleyball">
+                <div class="ticker-icon vol"><i class="fas fa-volleyball-ball"></i></div>
+                <span class="ticker-status">VOLLEYBALL</span>
+                <div class="ticker-info">
+                    <span class="ticker-teams" id="t-vol-teams">MATCH TBD</span>
+                    <span class="ticker-score" id="t-vol-score">Awaiting Start</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
     <header class="hero">
 
         <p class="hero-subtitle">Bhubaneswar Engineering College Presents</p>
@@ -57,12 +89,6 @@
         </div>
 
         <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem;">
-            <div id="live-indicator-hero" style="display: none; width: 100%; justify-content: center; margin-bottom: 1rem;">
-                <a href="live-score.html" class="glass-panel" style="padding: 0.8rem 1.5rem; border-color: var(--accent); color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 10px; animation: pulse 2s infinite;">
-                   <span style="display: inline-block; width: 10px; height: 10px; background: red; border-radius: 50%;"></span>
-                   LIVE SCORE: <span id="hero-live-team">CRICKET MATCH</span>
-                </a>
-            </div>
             <a href="sports.html" class="btn btn-primary">Sports</a>
             <a href="cultural.html" class="btn btn-glass">Cultural</a>
             <a href="events.html" class="btn btn-glass">Other Events</a>
@@ -70,7 +96,16 @@
         </div>
     </header>
 
-    <section class="container" style="margin-top: 4rem;">
+    <!-- Cinematic Live Match Spotlight -->
+    <section class="spotlight-slider-section">
+        <div class="slider-container">
+            <div class="slider-track" id="cinematic-slider-track">
+                <!-- Injected via LiveSlider.js -->
+            </div>
+        </div>
+    </section>
+
+    <section class="container" style="margin-top: 2rem;">
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
             <div class="section-title" style="margin: 0;">Sports Broadcast Hub</div>
             <div id="hub-live-status"></div>
@@ -203,10 +238,13 @@
     <script src="js/winnerCarousel.js?v=2.6"></script>
     <script src="js/winnerWall.js?v=2.6"></script>
     <script src="js/main.js?v=2.6"></script>
+    <script src="js/liveSlider.js?v=2.6"></script>
     <script src="js/spotlight.js?v=2.6"></script>
     <script type="module">
         import './js/cloudConfig.js';
         import './js/cricketEngine.js';
+        import './js/kabaddiEngine.js';
+        import './js/volleyballEngine.js';
         import './js/winnerEngine.js';
         import './js/eventEngine.js';
         import './js/adminController.js';
@@ -214,19 +252,68 @@
         // Initialize Connection Indicator
         window.AdminController.initConnectionIndicator();
 
-        // Initialize Engines
+        // 1. Cricket Sync
         window.CricketEngine.initSync((state) => {
-            const liveIndicator = document.getElementById('live-indicator-hero');
-            const heroTeam = document.getElementById('hero-live-team');
-            if (state && state.matchInfo && state.matchInfo.status === 'LIVE') {
-                const { teamA, teamB, currentInnings, battingFirst } = state.matchInfo;
-                const curKey = (battingFirst === teamA.name) ? (currentInnings === 1 ? 'teamA' : 'teamB') : (currentInnings === 1 ? 'teamB' : 'teamA');
-                const curTeam = state.matchInfo[curKey];
+            const statusEl = document.querySelector('#ticker-cricket .ticker-status');
+            if (state && state.matchInfo) {
+                const { teamA, teamB, currentInnings, battingFirst, status } = state.matchInfo;
+                document.getElementById('t-cri-teams').innerText = `${teamA.name} VS ${teamB.name}`;
                 
-                if (liveIndicator) liveIndicator.style.display = 'flex';
-                if (heroTeam) heroTeam.innerText = `${teamA.name} VS ${teamB.name} | ${curTeam.score}/${curTeam.wickets} (${Math.floor(curTeam.balls/6)}.${curTeam.balls%6})`;
-            } else {
-                if (liveIndicator) liveIndicator.style.display = 'none';
+                if (status === 'LIVE') {
+                    statusEl.className = 'ticker-status status-live-pulse';
+                    const curKey = (battingFirst === teamA.name) ? (currentInnings === 1 ? 'teamA' : 'teamB') : (currentInnings === 1 ? 'teamB' : 'teamA');
+                    const team = state.matchInfo[curKey];
+                    document.getElementById('t-cri-score').innerText = `${team.score}/${team.wickets} (${Math.floor(team.balls/6)}.${team.balls%6})`;
+                } else if (status === 'COMPLETED') {
+                    statusEl.className = 'ticker-status';
+                    statusEl.style.background = 'var(--accent-green)';
+                    document.getElementById('t-cri-score').innerText = 'MATCH COMPLETED';
+                } else {
+                    statusEl.className = 'ticker-status';
+                    document.getElementById('t-cri-score').innerText = 'Upcoming';
+                }
+            }
+        });
+
+        // 2. Kabaddi Sync
+        window.KabaddiEngine.initSync((state) => {
+            const statusEl = document.querySelector('#ticker-kabaddi .ticker-status');
+            if (state && state.matchInfo) {
+                const { teamA, teamB, status } = state.matchInfo;
+                document.getElementById('t-kab-teams').innerText = `${teamA.name} VS ${teamB.name}`;
+                
+                if (status === 'LIVE') {
+                    statusEl.className = 'ticker-status status-live-pulse';
+                    document.getElementById('t-kab-score').innerText = `${teamA.score} - ${teamB.score} (Live)`;
+                } else if (status === 'COMPLETED') {
+                    statusEl.className = 'ticker-status';
+                    statusEl.style.background = 'var(--accent-green)';
+                    document.getElementById('t-kab-score').innerText = `Finished: ${teamA.score}-${teamB.score}`;
+                } else {
+                    statusEl.className = 'ticker-status';
+                    document.getElementById('t-kab-score').innerText = 'Upcoming';
+                }
+            }
+        });
+
+        // 3. Volleyball Sync
+        window.VolleyballEngine.initSync((state) => {
+            const statusEl = document.querySelector('#ticker-volleyball .ticker-status');
+            if (state && state.matchInfo) {
+                const { teamA, teamB, status } = state.matchInfo;
+                document.getElementById('t-vol-teams').innerText = `${teamA.name} VS ${teamB.name}`;
+                
+                if (status === 'LIVE') {
+                    statusEl.className = 'ticker-status status-live-pulse';
+                    document.getElementById('t-vol-score').innerText = `Sets: ${teamA.setsWon}-${teamB.setsWon} (Live)`;
+                } else if (status === 'COMPLETED') {
+                    statusEl.className = 'ticker-status';
+                    statusEl.style.background = 'var(--accent-green)';
+                    document.getElementById('t-vol-score').innerText = `Finished: ${teamA.setsWon}-${teamB.setsWon}`;
+                } else {
+                    statusEl.className = 'ticker-status';
+                    document.getElementById('t-vol-score').innerText = 'Upcoming';
+                }
             }
         });
 
@@ -248,6 +335,10 @@
             if (type === 'spotlight') {
                if (window.SpotlightManager) window.SpotlightManager.render(data);
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+             if(window.LiveSlider) window.LiveSlider.init('cinematic-slider-track');
         });
 
         document.addEventListener('DOMContentLoaded', () => {

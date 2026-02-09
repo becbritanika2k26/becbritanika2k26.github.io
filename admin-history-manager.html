@@ -75,15 +75,20 @@
                         card.id = `item-${m.id}`;
                         card.className = 'manage-card';
                         
-                        // Extract teams based on structure
-                        const teamA = m.teams ? m.teams.teamA.name : m.teamA;
-                        const teamB = m.teams ? m.teams.teamB.name : m.teamB;
+                        // Extract teams and scores based on structure
+                        const isCricket = coll.id === 'cricketHistory';
+                        const teamA = isCricket ? m.teams.teamA.name : m.teamA;
+                        const teamB = isCricket ? m.teams.teamB.name : m.teamB;
+                        const scoreA = isCricket ? `${m.finalScores.teamA.score}/${m.finalScores.teamA.wickets}` : m.scoreA;
+                        const scoreB = isCricket ? `${m.finalScores.teamB.score}/${m.finalScores.teamB.wickets}` : m.scoreB;
+                        const result = isCricket ? m.result : (m.winner + " WON");
                         const date = new Date(m.timestamp).toLocaleString();
 
                         card.innerHTML = `
                             <div class="match-info">
                                 <span class="sport-tag ${coll.class}">${coll.label}</span>
-                                <div style="font-weight: 900; font-size: 1.1rem;">${teamA} VS ${teamB}</div>
+                                <div style="font-weight: 900; font-size: 1.1rem;">${teamA} (${scoreA}) VS ${teamB} (${scoreB})</div>
+                                <div style="font-size: 0.8rem; color: var(--accent-blue); margin-top: 5px; font-weight: bold;">${result}</div>
                                 <div style="font-size: 0.7rem; opacity: 0.5; margin-top: 5px;">${date}</div>
                             </div>
                             <button class="btn-delete" onclick="confirmDelete('${coll.id}', '${m.id}')">

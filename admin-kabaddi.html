@@ -81,7 +81,16 @@
             </div>
             <button onclick="initMatch()" class="btn-main btn-start">START NEW MATCH</button>
             
-            <div style="margin-top: 30px;">
+            <div style="margin-top: 30px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <label style="font-size: 0.7rem; color: var(--accent-blue); font-weight: 800; display: block; margin-bottom: 10px;">MATCH TIMER</label>
+                <div id="timer-display" style="font-size: 2.5rem; font-weight: 900; color: #fff; text-align: center; font-family: monospace; margin-bottom: 15px;">20:00</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button id="timer-toggle-btn" onclick="toggleTimer()" class="btn-main" style="background: var(--accent-green); color: #000; margin: 0;">START</button>
+                    <button onclick="resetTimer()" class="btn-main" style="background: rgba(255,255,255,0.1); color: #fff; margin: 0;">RESET</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
                 <label style="font-size: 0.7rem; color: var(--accent-blue); font-weight: 800;">MATCH STATUS</label>
                 <select id="match-status-sel" onchange="updateStatus()" class="btn-main" style="background:#1e293b; color:#fff; border: 1px solid #334155;">
                     <option value="LIVE">LIVE MATCH</option>
@@ -94,7 +103,8 @@
                 </select>
 
                 <button onclick="undo()" class="btn-main" style="margin-top: 20px; background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue);">⏪ UNDO LAST ACTION</button>
-                <button onclick="hardReset()" class="btn-main btn-reset" style="margin-top: 10px;">🗑 HARD RESET SYSTEM</button>
+                <button onclick="finishMatchPrompt()" class="btn-main" style="margin-top: 10px; background: #ef4444; color: #fff; border: none; font-weight: 900; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);">🏁 FINISH MATCH & SAVE</button>
+                <button onclick="hardReset()" class="btn-main btn-reset" style="margin-top: 10px; opacity: 0.5;">🗑 HARD RESET SYSTEM</button>
             </div>
         </aside>
 
@@ -161,6 +171,21 @@
             document.getElementById('match-status-sel').value = matchInfo.status;
             document.getElementById('match-half-sel').value = matchInfo.half;
 
+            // Timer update
+            const totalSeconds = matchInfo.timer || 0;
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            const toggleBtn = document.getElementById('timer-toggle-btn');
+            if (matchInfo.isTimerRunning) {
+                toggleBtn.innerText = 'PAUSE';
+                toggleBtn.style.background = 'var(--accent-gold)';
+            } else {
+                toggleBtn.innerText = 'START';
+                toggleBtn.style.background = 'var(--accent-green)';
+            }
+
             const timeEl = document.getElementById('timeline');
             timeEl.innerHTML = timeline.map(it => `
                 <div class="timeline-item">
@@ -170,17 +195,37 @@
             `).join('');
         }
 
+        // Timer Tick (Only admin handles ticking to avoid sync conflicts)
+        setInterval(() => {
+            if (window.KabaddiEngine && window.KabaddiEngine.state && window.KabaddiEngine.state.matchInfo.isTimerRunning) {
+                window.KabaddiEngine.tick();
+            }
+        }, 1000);
+
+        window.toggleTimer = () => window.KabaddiEngine.toggleTimer();
+        window.resetTimer = () => {
+            const mins = prompt("Enter minutes for half:", "20");
+            if (mins) window.KabaddiEngine.setTimer(parseInt(mins) * 60);
+        };
+
         window.initMatch = () => {
-            window.KabaddiEngine.initMatch({
-                teamA: document.getElementById('setup-team-a').value,
-                teamB: document.getElementById('setup-team-b').value
-            });
+            if(confirm("Start new match? Current progress will be lost!")) {
+                window.KabaddiEngine.initMatch({
+                    teamA: document.getElementById('setup-team-a').value,
+                    teamB: document.getElementById('setup-team-b').value
+                });
+            }
         };
 
         window.addPts = (team, type, pts) => window.KabaddiEngine.addPoints(team, type, pts);
         window.updateStatus = () => window.KabaddiEngine.updateStatus(document.getElementById('match-status-sel').value);
         window.updateHalf = () => window.KabaddiEngine.setHalf(document.getElementById('match-half-sel').value);
         window.undo = () => window.KabaddiEngine.undo();
+        window.finishMatchPrompt = () => {
+            if (confirm("🚨 FINISH MATCH?\n\nThis will record the final scores into history and stop the timer.")) {
+                window.KabaddiEngine.finishMatch();
+            }
+        };
         window.hardReset = () => { if(confirm("Bhai, pura Kabaddi match reset kardu?")) window.KabaddiEngine.initMatch({}); };
     </script>
 </body>

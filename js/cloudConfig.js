@@ -53,7 +53,9 @@ const initTracker = async () => {
         }
 
         // 2. Track Daily Unique
-        const today = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const today = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
         if (localStorage.getItem('bec_day_log') !== today) {
             await setDoc(doc(db, 'analytics', 'daily'), { [today]: increment(1) }, { merge: true });
             localStorage.setItem('bec_day_log', today);

@@ -130,6 +130,25 @@
             padding: 100px 0;
             opacity: 0.5;
         }
+        .sport-tab {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .sport-tab.active {
+            background: var(--accent-blue);
+            color: #000;
+            border-color: var(--accent-blue);
+        }
+        .sport-tab:hover:not(.active) {
+            background: rgba(255,255,255,0.1);
+        }
         @media (max-width: 600px) {
             .header { flex-direction: column; gap: 20px; align-items: flex-start; }
             .team-name { font-size: 1rem; }
@@ -145,9 +164,13 @@
         <div class="header">
             <div>
                 <h1 style="margin:0; font-size: 1.8rem; font-weight: 900; letter-spacing: -1px;">MATCH <span style="color: var(--accent-blue);">HISTORY</span></h1>
-                <p style="margin: 5px 0 0; font-size: 0.8rem; opacity: 0.6;">All completed cricket matches</p>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button onclick="switchSport('cricket')" class="sport-tab active" id="tab-cricket">CRICKET</button>
+                    <button onclick="switchSport('kabaddi')" class="sport-tab" id="tab-kabaddi">KABADDI</button>
+                    <button onclick="switchSport('volleyball')" class="sport-tab" id="tab-volleyball">VOLLEYBALL</button>
+                </div>
             </div>
-            <a href="admin-sports.html" class="btn-back"><i class="fas fa-chevron-left"></i> BACK TO DASHBOARD</a>
+            <a href="index.html" class="btn-back"><i class="fas fa-chevron-left"></i> BACK HOME</a>
         </div>
 
         <div id="history-list">
@@ -161,12 +184,37 @@
     <script type="module">
         import RealtimeSync from './js/realtimeSync.js';
 
-        async function loadHistory() {
+        let currentSport = 'cricket';
+        let unsubscribe = null;
+
+        window.switchSport = (sport) => {
+            currentSport = sport;
+            
+            // Update UI
+            document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${sport}`).classList.add('active');
+            
+            // Change accent colors based on sport
+            const root = document.documentElement;
+            if (sport === 'cricket') root.style.setProperty('--accent-blue', '#38bdf8');
+            else if (sport === 'kabaddi') root.style.setProperty('--accent-blue', '#f87171');
+            else if (sport === 'volleyball') root.style.setProperty('--accent-blue', '#fbbf24');
+
+            loadHistory(sport);
+        };
+
+        async function loadHistory(sport) {
             const list = document.getElementById('history-list');
+            list.innerHTML = '<div class="no-data"><p>Loading records...</p></div>';
+            
+            const collectionName = `${sport}History`;
+            
+            if (unsubscribe) unsubscribe();
+
             try {
-                RealtimeSync.subscribeCollection('cricketHistory', (data) => {
+                unsubscribe = RealtimeSync.subscribeCollection(collectionName, (data) => {
                     if (!data || data.length === 0) {
-                        list.innerHTML = '<div class="no-data"><p>No match history available yet.</p></div>';
+                        list.innerHTML = `<div class="no-data"><p>No ${sport} history available yet.</p></div>`;
                         return;
                     }
 
@@ -175,30 +223,61 @@
 
                     list.innerHTML = data.map(m => {
                         const date = new Date(m.timestamp).toLocaleDateString() + ' ' + new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                        return `
-                            <div class="match-card">
-                                <div class="match-header">
-                                    <span>${date}</span>
-                                    <span>${m.target ? 'TARGET: ' + m.target : 'FIRST INNINGS ONLY'}</span>
-                                </div>
-                                <div class="teams-row">
-                                    <div class="team">
-                                        <span class="team-name">${m.teams.teamA.name}</span>
-                                        <span class="team-score">${m.finalScores.teamA.score}/${m.finalScores.teamA.wickets}</span>
-                                        <span style="font-size: 0.7rem; opacity: 0.5;">${(m.finalScores.teamA.balls/6).toFixed(1)} Overs</span>
+                        
+                        if (sport === 'cricket') {
+                            return `
+                                <div class="match-card">
+                                    <div class="match-header">
+                                        <span>${date}</span>
+                                        <span>${m.target ? 'TARGET: ' + m.target : 'FIRST INNINGS ONLY'}</span>
                                     </div>
-                                    <div class="vs">VS</div>
-                                    <div class="team" style="text-align: right;">
-                                        <span class="team-name">${m.teams.teamB.name}</span>
-                                        <span class="team-score">${m.finalScores.teamB.score}/${m.finalScores.teamB.wickets}</span>
-                                        <span style="font-size: 0.7rem; opacity: 0.5;">${(m.finalScores.teamB.balls/6).toFixed(1)} Overs</span>
+                                    <div class="teams-row">
+                                        <div class="team">
+                                            <span class="team-name">${m.teams.teamA.name}</span>
+                                            <span class="team-score">${m.finalScores.teamA.score}/${m.finalScores.teamA.wickets}</span>
+                                            <span style="font-size: 0.7rem; opacity: 0.5;">${(m.finalScores.teamA.balls/6).toFixed(1)} Overs</span>
+                                        </div>
+                                        <div class="vs">VS</div>
+                                        <div class="team" style="text-align: right;">
+                                            <span class="team-name">${m.teams.teamB.name}</span>
+                                            <span class="team-score">${m.finalScores.teamB.score}/${m.finalScores.teamB.wickets}</span>
+                                            <span style="font-size: 0.7rem; opacity: 0.5;">${(m.finalScores.teamB.balls/6).toFixed(1)} Overs</span>
+                                        </div>
+                                    </div>
+                                    <div class="result-bar" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8;">
+                                        <i class="fas fa-trophy" style="margin-right: 8px;"></i> ${m.result}
                                     </div>
                                 </div>
-                                <div class="result-bar">
-                                    <i class="fas fa-trophy" style="margin-right: 8px;"></i> ${m.result}
+                            `;
+                        } else {
+                            // Kabaddi or Volleyball
+                            const accentColor = sport === 'kabaddi' ? '#f87171' : '#fbbf24';
+                            const scoreLabel = sport === 'volleyball' ? 'SETS' : 'POINTS';
+                            return `
+                                <div class="match-card" style="border-left-color: ${accentColor}">
+                                    <div class="match-header">
+                                        <span>${date}</span>
+                                        <span>${sport.toUpperCase()} MATCH</span>
+                                    </div>
+                                    <div class="teams-row">
+                                        <div class="team">
+                                            <span class="team-name">${m.teamA}</span>
+                                            <span class="team-score" style="color: ${accentColor}">${m.scoreA}</span>
+                                            <span style="font-size: 0.7rem; opacity: 0.5;">${scoreLabel}</span>
+                                        </div>
+                                        <div class="vs">VS</div>
+                                        <div class="team" style="text-align: right;">
+                                            <span class="team-name">${m.teamB}</span>
+                                            <span class="team-score" style="color: ${accentColor}">${m.scoreB}</span>
+                                            <span style="font-size: 0.7rem; opacity: 0.5;">${scoreLabel}</span>
+                                        </div>
+                                    </div>
+                                    <div class="result-bar" style="background: ${accentColor}1a; color: ${accentColor}">
+                                        <i class="fas fa-trophy" style="margin-right: 8px;"></i> ${m.winner} WON
+                                    </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                        }
                     }).join('');
                 }, 'timestamp', 'desc');
             } catch (err) {
@@ -207,7 +286,7 @@
             }
         }
 
-        loadHistory();
+        loadHistory('cricket');
     </script>
 </body>
 </html>

@@ -126,7 +126,17 @@
                 </select>
             </div>
             <button onclick="initMatch()" class="btn-main btn-start">INITIALIZE MATCH</button>
-            <button onclick="hardReset()" class="btn-main btn-reset" style="margin-top: 20px;">RESET ALL</button>
+            <div style="margin-top: 30px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <label style="font-size: 0.7rem; color: var(--accent-blue); font-weight: 800; display: block; margin-bottom: 10px;">MATCH TIMER</label>
+                <div id="timer-display" style="font-size: 2.5rem; font-weight: 900; color: #fff; text-align: center; font-family: monospace; margin-bottom: 15px;">00:00</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button id="timer-toggle-btn" onclick="toggleTimer()" class="btn-main" style="background: var(--accent-green); color: #000; margin: 0;">START</button>
+                    <button onclick="resetTimer()" class="btn-main" style="background: rgba(255,255,255,0.1); color: #fff; margin: 0;">RESET</button>
+                </div>
+            </div>
+
+            <button onclick="finishMatchPrompt()" class="btn-main" style="margin-top: 20px; background: #ef4444; color: #fff; border: none; font-weight: 900; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);">🏁 FINISH MATCH & SAVE</button>
+            <button onclick="hardReset()" class="btn-main btn-reset" style="margin-top: 10px; opacity: 0.5;">🗑 HARD RESET SYSTEM</button>
         </aside>
 
         <main>
@@ -197,6 +207,21 @@
             document.getElementById('serve-a').classList.toggle('active', matchInfo.servingTeam === 'A');
             document.getElementById('serve-b').classList.toggle('active', matchInfo.servingTeam === 'B');
 
+            // Timer update
+            const totalSeconds = matchInfo.timer || 0;
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            const toggleBtn = document.getElementById('timer-toggle-btn');
+            if (matchInfo.isTimerRunning) {
+                toggleBtn.innerText = 'PAUSE';
+                toggleBtn.style.background = 'var(--accent-gold)';
+            } else {
+                toggleBtn.innerText = 'START';
+                toggleBtn.style.background = 'var(--accent-green)';
+            }
+
             const histContainer = document.getElementById('set-history');
             histContainer.innerHTML = history.map(h => `
                 <div style="background: rgba(255,255,255,0.05); padding: 10px 20px; border-radius: 8px; text-align:center;">
@@ -206,15 +231,34 @@
             `).join('');
         }
 
+        // Timer Tick
+        setInterval(() => {
+            if (window.VolleyballEngine && window.VolleyballEngine.state && window.VolleyballEngine.state.matchInfo.isTimerRunning) {
+                window.VolleyballEngine.tick();
+            }
+        }, 1000);
+
+        window.toggleTimer = () => window.VolleyballEngine.toggleTimer();
+        window.resetTimer = () => {
+            if(confirm("Reset timer to 00:00?")) window.VolleyballEngine.setTimer(0);
+        };
+
         window.initMatch = () => {
-            window.VolleyballEngine.initMatch({
-                teamA: document.getElementById('setup-team-a').value,
-                teamB: document.getElementById('setup-team-b').value,
-                totalSets: parseInt(document.getElementById('setup-sets').value)
-            });
+            if(confirm("Start new match? Current progress will be lost!")) {
+                window.VolleyballEngine.initMatch({
+                    teamA: document.getElementById('setup-team-a').value,
+                    teamB: document.getElementById('setup-team-b').value,
+                    totalSets: parseInt(document.getElementById('setup-sets').value)
+                });
+            }
         };
 
         window.addPoint = (team) => window.VolleyballEngine.addPoint(team);
+        window.finishMatchPrompt = () => {
+            if (confirm("🚨 FINISH MATCH?\n\nThis will record the final sets score into history and stop the timer.")) {
+                window.VolleyballEngine.finishMatch();
+            }
+        };
         window.hardReset = () => { if(confirm("Reset entire match?")) window.VolleyballEngine.initMatch({}); };
     </script>
 </body>

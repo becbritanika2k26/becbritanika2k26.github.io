@@ -92,7 +92,10 @@
 </head>
 <body>
     <div class="vb-container">
-        <div class="match-info-bar" id="match-status-bar">LIVE: BEST OF 3 SETS</div>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 20px;">
+            <div class="match-info-bar" id="match-status-bar" style="margin:0;">LIVE: BEST OF 3 SETS</div>
+            <div id="vb-timer" style="font-size: 2.5rem; font-weight: 900; color: #fff; font-family: 'Outfit', sans-serif; background: rgba(30, 41, 59, 0.6); padding: 5px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); line-height: 1;">00:00</div>
+        </div>
         
         <div class="main-score-card">
             <div class="team-vb">
@@ -122,6 +125,20 @@
             <div class="event-text" id="event-main-text">POINT!</div>
             <div class="event-subtext" id="event-sub-text">GREAT PLAY</div>
         </div>
+    </div>
+
+    <!-- Match Winner Overlay -->
+    <div id="winner-overlay" class="event-overlay theme-winner" style="display:none; background: rgba(0,0,0,0.9); flex-direction: column;">
+        <div class="event-content" style="transform: scale(1.5);">
+            <div style="font-size: 5rem; color: var(--accent-gold); margin-bottom: 20px;">
+                <i class="fas fa-trophy winner-animate"></i>
+            </div>
+            <div class="event-text" id="winner-name-display" style="font-size: 3.5rem; color: var(--accent-gold);">TEAM NAME</div>
+            <div class="event-subtext" style="font-size: 1.5rem; letter-spacing: 5px;">CHAMPIONS</div>
+        </div>
+        <button onclick="document.getElementById('winner-overlay').style.display='none'" style="margin-top: 50px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer;">CLOSE</button>
+    </div>
+
     <div class="winner-sidebar">
         <div class="sidebar-title">
             <i class="fas fa-history"></i> PREVIOUS MATCHES
@@ -131,6 +148,8 @@
         </div>
     </div>
 
+    <script src="js/winnerPopup.js"></script>
+
     <script type="module">
         import './js/volleyballEngine.js';
         import './js/historyRenderer.js';
@@ -139,6 +158,7 @@
         window.HistoryRenderer.init('side-history-list', 'volleyball');
 
         let lastSeenEvent = null;
+        let winnerShown = false;
 
         function triggerFX(type, sub) {
             const overlay = document.getElementById('event-animation-overlay');
@@ -147,7 +167,7 @@
             
             overlay.className = 'event-overlay theme-point';
             main.innerText = type;
-            subT.innerText = sub || '';
+            if (subT) subT.innerText = sub || '';
             
             overlay.style.display = 'flex';
             setTimeout(() => {
@@ -162,6 +182,18 @@
         window.VolleyballEngine.initSync((state) => {
             if (!state) return;
             const { matchInfo, currentSet, history, lastEvent } = state;
+
+            // Winner Animation Check
+            if (matchInfo.status === 'COMPLETED' && matchInfo.winner && !winnerShown) {
+                winnerShown = true;
+                const winOverlay = document.getElementById('winner-overlay');
+                document.getElementById('winner-name-display').innerText = matchInfo.winner.toUpperCase();
+                winOverlay.style.display = 'flex';
+                if (window.WinnerPopup) window.WinnerPopup.startConfetti();
+            } else if (matchInfo.status === 'LIVE') {
+                winnerShown = false; // Reset if new match starts
+                document.getElementById('winner-overlay').style.display = 'none';
+            }
 
             // Animation Check
             if (lastEvent && lastEvent !== lastSeenEvent) {
@@ -182,6 +214,12 @@
             document.getElementById('serve-b').style.display = matchInfo.servingTeam === 'B' ? 'block' : 'none';
 
             document.getElementById('match-status-bar').innerText = `${matchInfo.status}: SET ${matchInfo.currentSetNumber}`;
+
+            // Timer update
+            const totalSeconds = matchInfo.timer || 0;
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            document.getElementById('vb-timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
             const tray = document.getElementById('history-tray');
             tray.innerHTML = history.map(h => `
