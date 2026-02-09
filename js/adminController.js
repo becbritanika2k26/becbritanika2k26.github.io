@@ -51,34 +51,60 @@ window.AdminController = {
     initConnectionIndicator() {
         const indicator = document.createElement('div');
         indicator.id = 'cloud-status-indicator';
-        indicator.style = `
-            position: fixed;
-            top: 26px;
-            right: 80px;
-            padding: 6px 12px;
-            background: rgba(255,255,255,0.05);
-            color: #fff;
-            border-radius: 50px;
-            font-size: 9px;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            pointer-events: none;
-            transition: 0.3s;
-        `;
-        indicator.innerHTML = `<span style="width: 6px; height: 6px; border-radius: 50%; background: #94a3b8;" id="status-dot"></span> <span id="status-text">CONNECTING</span>`;
 
-        // Try to append to nav for better integration
-        const nav = document.querySelector('nav');
-        if (nav) {
-            nav.appendChild(indicator);
-        } else {
-            document.body.appendChild(indicator);
-        }
+        const updatePosition = () => {
+            const isMobile = window.innerWidth <= 768;
+            const navLinks = document.querySelector('.nav-links');
+            const nav = document.querySelector('nav');
+
+            if (isMobile && navLinks) {
+                // Move inside mobile menu
+                indicator.style = `
+                    padding: 10px 15px;
+                    background: rgba(255,255,255,0.05);
+                    color: #fff;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    font-weight: 800;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    margin: 20px 0 10px 0;
+                    width: fit-content;
+                `;
+                if (navLinks.firstChild !== indicator) {
+                    navLinks.insertBefore(indicator, navLinks.firstChild);
+                }
+            } else {
+                // Top-right for Desktop
+                indicator.style = `
+                    position: fixed;
+                    top: 25px;
+                    right: 25px;
+                    padding: 6px 12px;
+                    background: rgba(10,11,16,0.8);
+                    color: #fff;
+                    border-radius: 50px;
+                    font-size: 9px;
+                    font-weight: 900;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    z-index: 1001;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    pointer-events: none;
+                `;
+                if (document.body.lastChild !== indicator) {
+                    document.body.appendChild(indicator);
+                }
+            }
+        };
+
+        indicator.innerHTML = `<span style="width: 6px; height: 6px; border-radius: 50%; background: #94a3b8;" id="status-dot"></span> <span id="status-text">CONNECTING</span>`;
+        updatePosition();
+        window.addEventListener('resize', updatePosition);
 
         window.addEventListener('cloudConnectionChanged', (e) => {
             const status = e.detail;
