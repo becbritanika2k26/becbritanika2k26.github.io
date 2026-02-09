@@ -1449,7 +1449,9 @@ nav {
     }
 
     .hero {
-        padding: 80px 15px 40px;
+        padding: 30px 15px 40px;
+        min-height: 70vh;
+        /* Shorter min-height to push content up */
     }
 
     .hero h1 {

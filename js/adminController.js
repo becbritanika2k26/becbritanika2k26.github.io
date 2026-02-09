@@ -53,25 +53,32 @@ window.AdminController = {
         indicator.id = 'cloud-status-indicator';
         indicator.style = `
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 8px 15px;
-            background: rgba(0,0,0,0.8);
+            top: 26px;
+            right: 80px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
             color: #fff;
             border-radius: 50px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 900;
             display: flex;
             align-items: center;
-            gap: 8px;
-            z-index: 9999;
+            gap: 6px;
+            z-index: 1001;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.1);
             pointer-events: none;
             transition: 0.3s;
         `;
-        indicator.innerHTML = `<span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;" id="status-dot"></span> <span id="status-text">CONNECTING...</span>`;
-        document.body.appendChild(indicator);
+        indicator.innerHTML = `<span style="width: 6px; height: 6px; border-radius: 50%; background: #94a3b8;" id="status-dot"></span> <span id="status-text">CONNECTING</span>`;
+
+        // Try to append to nav for better integration
+        const nav = document.querySelector('nav');
+        if (nav) {
+            nav.appendChild(indicator);
+        } else {
+            document.body.appendChild(indicator);
+        }
 
         window.addEventListener('cloudConnectionChanged', (e) => {
             const status = e.detail;
