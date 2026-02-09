@@ -53,8 +53,8 @@ window.AdminController = {
         indicator.id = 'cloud-status-indicator';
         indicator.style = `
             position: fixed;
-            top: 20px;
-            right: 20px;
+            bottom: 20px;
+            left: 20px;
             padding: 8px 15px;
             background: rgba(0,0,0,0.8);
             color: #fff;
