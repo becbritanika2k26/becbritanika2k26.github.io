@@ -1449,8 +1449,7 @@ nav {
     }
 
     .hero {
-        padding: 40px 15px 40px;
-        /* Reduced top padding */
+        padding: 80px 15px 40px;
     }
 
     .hero h1 {
